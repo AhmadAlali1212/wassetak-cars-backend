@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحليل شامل لنظام Syria Motor Second</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f8f9fa;
+            color: #2d3748;
+            line-height: 1.8;
+            direction: rtl;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 40px;
+            page-break-after: always;
+        }
+
+        .cover-page h1 {
+            font-size: 3em;
+            font-weight: 900;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #e94560, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cover-page h2 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #a8dadc;
+        }
+
+        .cover-page .meta-info {
+            background: rgba(255,255,255,0.1);
+            padding: 30px 50px;
+            border-radius: 15px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .cover-page .meta-info p {
+            font-size: 1.1em;
+            margin: 8px 0;
+            color: #e0e0e0;
+        }
+
+        .cover-page .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e94560, #f39c12);
+            padding: 8px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1em;
+            margin-top: 20px;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: white;
+            padding: 50px;
+            page-break-after: always;
+            min-height: 100vh;
+        }
+
+        .toc h2 {
+            font-size: 2em;
+            color: #1a1a2e;
+            border-bottom: 4px solid #e94560;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .toc-list {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+
+        .toc-list li {
+            counter-increment: toc-counter;
+            padding: 12px 20px;
+            border-bottom: 1px dashed #e0e0e0;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .toc-list li::before {
+            content: counter(toc-counter);
+            background: linear-gradient(135deg, #e94560, #f39c12);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-weight: 700;
+            font-size: 0.9em;
+            flex-shrink: 0;
+        }
+
+        .toc-list li a {
+            color: #2d3748;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Section Styles */
+        .section {
+            background: white;
+            margin: 0;
+            padding: 50px;
+            page-break-before: always;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #e94560;
+        }
+
+        .section-number {
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: 800;
+            margin-left: 20px;
+            flex-shrink: 0;
+        }
+
+        .section-header h2 {
+            font-size: 1.8em;
+            color: #1a1a2e;
+        }
+
+        h3 {
+            font-size: 1.4em;
+            color: #0f3460;
+            margin: 30px 0 15px 0;
+            padding-right: 15px;
+            border-right: 4px solid #e94560;
+        }
+
+        h4 {
+            font-size: 1.15em;
+            color: #16213e;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin: 10px 0;
+            text-align: justify;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            color: white;
+        }
+
+        th {
+            padding: 15px 20px;
+            text-align: right;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background: #e8f4ff;
+        }
+
+        /* Code blocks */
+        code {
+            background: #f1f3f5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e94560;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        pre {
+            background: #1a1a2e;
+            color: #a8dadc;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-size: 0.85em;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        /* Diagrams */
+        .diagram-container {
+            background: #fdfdfd;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 25px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .diagram-container h4 {
+            text-align: center;
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            border-right: none;
+        }
+
+        .mermaid {
+            direction: ltr;
+        }
+
+        /* Info boxes */
+        .info-box {
+            background: linear-gradient(135deg, #e8f4ff, #f0f7ff);
+            border-right: 5px solid #0f3460;
+            padding: 20px 25px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fff8e1, #fff3cd);
+            border-right: 5px solid #f39c12;
+            padding: 20px 25px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-right: 5px solid #27ae60;
+            padding: 20px 25px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+        }
+
+        /* File description card */
+        .file-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .file-card .file-path {
+            background: #1a1a2e;
+            color: #a8dadc;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            direction: ltr;
+            text-align: left;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .file-card .file-desc {
+            color: #4a5568;
+        }
+
+        ul, ol {
+            padding-right: 30px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+            }
+            .section {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .cover-page {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            thead {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .section-number {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-completed { background: #cce5ff; color: #004085; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card .stat-number {
+            font-size: 2.5em;
+            font-weight: 800;
+        }
+
+        .stat-card .stat-label {
+            font-size: 1em;
+            color: #a8dadc;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== COVER PAGE ==================== -->
+    <div class="cover-page">
+        <h1>🚗 Syria Motor Second</h1>
+        <h2>وثيقة التحليل الشامل لهندسة البرمجيات</h2>
+        <p style="font-size: 1.2em; color: #ccc; max-width: 600px;">
+            منصة متكاملة لسوق السيارات في سوريا - البيع والتأجير والمزادات وخدمات الورش
+        </p>
+        <div class="meta-info">
+            <p><strong>📅 تاريخ الإنشاء:</strong> 11 أبريل 2026</p>
+            <p><strong>🛠️ إطار العمل:</strong> Laravel 10 (PHP 8.x)</p>
+            <p><strong>📦 قاعدة البيانات:</strong> MySQL / SQLite</p>
+            <p><strong>🔐 المصادقة:</strong> Laravel Sanctum (API Tokens)</p>
+            <p><strong>🎨 الواجهة:</strong> Blade Templates + Tailwind CSS</p>
+        </div>
+        <div class="badge">Software Engineering Analysis Document</div>
+    </div>
+
+    <!-- ==================== TABLE OF CONTENTS ==================== -->
+    <div class="toc">
+        <h2>📋 فهرس المحتويات</h2>
+        <ol class="toc-list">
+            <li><a href="#sec1">نظرة عامة على النظام</a></li>
+            <li><a href="#sec2">هيكلية المشروع (Project Architecture)</a></li>
+            <li><a href="#sec3">مخطط حالات الاستخدام (Use Case Diagram)</a></li>
+            <li><a href="#sec4">مخطط الكيانات والعلاقات (ER Diagram)</a></li>
+            <li><a href="#sec5">مخطط الفئات (Class Diagram)</a></li>
+            <li><a href="#sec6">مخطط التسلسل (Sequence Diagrams)</a></li>
+            <li><a href="#sec7">مخطط المكونات (Component Diagram)</a></li>
+            <li><a href="#sec8">مخطط النشاط (Activity Diagrams)</a></li>
+            <li><a href="#sec9">وصف تفصيلي لجداول قاعدة البيانات</a></li>
+            <li><a href="#sec10">وصف تفصيلي للنماذج (Models)</a></li>
+            <li><a href="#sec11">وصف تفصيلي لوحدات التحكم (Controllers)</a></li>
+            <li><a href="#sec12">نظام المسارات (Routes)</a></li>
+            <li><a href="#sec13">نظام الصلاحيات والمصادقة</a></li>
+            <li><a href="#sec14">واجهة برمجة التطبيقات (API Endpoints)</a></li>
+            <li><a href="#sec15">طبقة العرض (Views)</a></li>
+        </ol>
+    </div>
+
+    <!-- ==================== SECTION 1: Overview ==================== -->
+    <div class="section" id="sec1">
+        <div class="section-header">
+            <div class="section-number">1</div>
+            <h2>نظرة عامة على النظام</h2>
+        </div>
+
+        <h3>1.1 وصف المشروع</h3>
+        <p>
+            نظام <strong>Syria Motor Second</strong> هو منصة إلكترونية متكاملة لسوق السيارات في سوريا.
+            يهدف النظام إلى توفير بيئة آمنة وموثوقة لبيع وشراء وتأجير السيارات، بالإضافة إلى نظام مزادات متطور
+            ومنصة لخدمات الورش والصيانة. المشروع مبني على إطار عمل <strong>Laravel 10</strong> ويقدم واجهة برمجية
+            (REST API) متكاملة مخصصة لتطبيقات الهاتف المحمول، بالإضافة إلى لوحة تحكم إدارية عبر الويب.
+        </p>
+
+        <h3>1.2 الأهداف الرئيسية</h3>
+        <ul>
+            <li>💰 <strong>البيع والشراء:</strong> نشر إعلانات بيع سيارات مع نظام تصفية وبحث متقدم</li>
+            <li>🔑 <strong>التأجير:</strong> إعلانات تأجير سيارات بأسعار يومية وشهرية</li>
+            <li>🔨 <strong>المزادات:</strong> نظام مزادات حي مع مزايدات ومؤقت زمني</li>
+            <li>🔧 <strong>خدمات الورش:</strong> ربط أصحاب السيارات بورش الصيانة المتخصصة</li>
+            <li>💳 <strong>النظام المالي:</strong> محفظة إلكترونية واشتراكات شهرية وعمولات</li>
+            <li>⭐ <strong>التقييمات:</strong> نظام تقييم متعدد الأشكال (Polymorphic) للورش والبائعين</li>
+            <li>💬 <strong>المراسلة:</strong> نظام تواصل مباشر بين المستخدمين</li>
+        </ul>
+
+        <h3>1.3 أنواع المستخدمين</h3>
+        <div class="grid-2">
+            <div class="stat-card">
+                <div class="stat-number">👤</div>
+                <div class="stat-label">فردي (Individual)<br>شراء، بيع، استئجار</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">🏢</div>
+                <div class="stat-label">شركة / معرض (Company)<br>بيع، تأجير، عروض ترويجية</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">🔧</div>
+                <div class="stat-label">ورشة (Workshop)<br>تقديم خدمات الصيانة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">🛡️</div>
+                <div class="stat-label">مدير النظام (Admin)<br>إدارة، مراقبة، تحكم كامل</div>
+            </div>
+        </div>
+
+        <h3>1.4 التقنيات المستخدمة</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>التقنية</th>
+                    <th>الوصف</th>
+                    <th>الإصدار</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Laravel</td><td>إطار العمل الأساسي (Backend Framework)</td><td>10.x</td></tr>
+                <tr><td>PHP</td><td>لغة البرمجة الخلفية</td><td>8.x</td></tr>
+                <tr><td>Laravel Sanctum</td><td>نظام المصادقة عبر API Tokens</td><td>3.x</td></tr>
+                <tr><td>Blade</td><td>محرك القوالب للواجهة الإدارية</td><td>مدمج</td></tr>
+                <tr><td>Tailwind CSS</td><td>إطار عمل CSS لتصميم الواجهة</td><td>3.x</td></tr>
+                <tr><td>Vite</td><td>أداة بناء Assets (CSS/JS)</td><td>4.x</td></tr>
+                <tr><td>MySQL / SQLite</td><td>نظام إدارة قواعد البيانات</td><td>-</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SECTION 2: Architecture ==================== -->
+    <div class="section" id="sec2">
+        <div class="section-header">
+            <div class="section-number">2</div>
+            <h2>هيكلية المشروع (Project Architecture)</h2>
+        </div>
+
+        <h3>2.1 النمط المعماري: MVC</h3>
+        <p>يتبع النظام نمط <strong>Model-View-Controller (MVC)</strong> المعتمد في Laravel:</p>
+
+        <div class="diagram-container">
+            <h4>📐 المعمارية العامة للنظام</h4>
+            <div class="mermaid">
+graph TB
+    subgraph "Client Layer"
+        A["📱 تطبيق الموبايل<br>(Flutter/React Native)"]
+        B["🌐 المتصفح<br>(Admin Dashboard)"]
+    end
+
+    subgraph "API Layer"
+        C["🔌 REST API<br>api.php Routes"]
+        D["🌐 Web Routes<br>web.php + admin.php"]
+    end
+
+    subgraph "Middleware Layer"
+        E["🔐 auth:sanctum"]
+        F["🛡️ AdminMiddleware"]
+        G["✅ VerifyCsrfToken"]
+    end
+
+    subgraph "Controller Layer"
+        H["AuthController"]
+        I["CarController"]
+        J["AuctionController"]
+        K["RentalAdController"]
+        L["WalletController"]
+        M["WorkshopController"]
+        N["ServiceRequestController"]
+        O["SubscriptionController"]
+        P["Admin Controllers"]
+    end
+
+    subgraph "Model Layer (Eloquent ORM)"
+        Q["User"] 
+        R["Car"]
+        S["Ad"]
+        T["Auction / Bid"]
+        U["RentalAd"]
+        V["Workshop"]
+        W["ServiceRequest"]
+        X["Wallet / Transaction"]
+        Y["Subscription"]
+        Z["Rating"]
+    end
+
+    subgraph "Database Layer"
+        DB[("🗄️ MySQL/SQLite<br>Database")]
+    end
+
+    A --> C
+    B --> D
+    C --> E
+    D --> F
+    D --> G
+    E --> H
+    E --> I
+    E --> J
+    E --> K
+    E --> L
+    E --> M
+    E --> N
+    E --> O
+    F --> P
+    H --> Q
+    I --> R
+    I --> S
+    J --> T
+    K --> U
+    M --> V
+    N --> W
+    L --> X
+    O --> Y
+    P --> Q
+    Q --> DB
+    R --> DB
+    S --> DB
+    T --> DB
+    U --> DB
+    V --> DB
+    W --> DB
+    X --> DB
+    Y --> DB
+    Z --> DB
+            </div>
+        </div>
+
+        <h3>2.2 هيكلية المجلدات</h3>
+        <pre>
+syria-motor-second/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Api/                    # وحدات تحكم الـ API
+│   │   │   │   ├── AuthController.php        # تسجيل / دخول / خروج
+│   │   │   │   ├── CarController.php         # إعلانات البيع
+│   │   │   │   ├── AuctionController.php     # المزادات والمزايدات
+│   │   │   │   ├── RentalAdController.php    # إعلانات التأجير
+│   │   │   │   ├── WalletController.php      # المحفظة والمعاملات
+│   │   │   │   ├── WorkshopController.php    # الورش
+│   │   │   │   ├── ServiceRequestController.php  # طلبات الخدمة
+│   │   │   │   └── SubscriptionController.php    # الاشتراكات
+│   │   │   ├── Admin/                  # وحدات تحكم لوحة الإدارة
+│   │   │   │   ├── DashboardController.php
+│   │   │   │   ├── UserController.php
+│   │   │   │   ├── AdController.php
+│   │   │   │   └── ... (10 Controllers)
+│   │   │   └── Auth/                   # وحدات المصادقة (Breeze)
+│   │   ├── Middleware/
+│   │   │   ├── AdminMiddleware.php     # حماية مسارات المدير
+│   │   │   └── Authenticate.php
+│   ├── Models/                         # النماذج (15 نموذج)
+│   │   ├── User.php
+│   │   ├── AccountType.php
+│   │   ├── Car.php
+│   │   ├── Ad.php
+│   │   ├── RentalAd.php
+│   │   ├── Auction.php
+│   │   ├── Bid.php
+│   │   ├── Workshop.php
+│   │   ├── ServiceRequest.php
+│   │   ├── Wallet.php
+│   │   ├── Transaction.php
+│   │   ├── Subscription.php
+│   │   ├── Promotion.php
+│   │   └── Rating.php
+├── database/
+│   ├── migrations/                     # ملفات التهجير (20 ملف)
+│   └── seeders/                        # ملفات البذر (13 ملف)
+├── routes/
+│   ├── web.php                         # مسارات الويب
+│   ├── api.php                         # مسارات API
+│   ├── admin.php                       # مسارات المدير
+│   └── auth.php                        # مسارات المصادقة
+├── resources/views/                    # ملفات العرض (Blade)
+│   ├── admin/                          # واجهات لوحة التحكم
+│   ├── layouts/                        # القوالب الأساسية
+│   └── dashboard.blade.php
+└── config/
+    └── sanctum.php                     # إعداد Sanctum
+        </pre>
+    </div>
+
+    <!-- ==================== SECTION 3: Use Case Diagram ==================== -->
+    <div class="section" id="sec3">
+        <div class="section-header">
+            <div class="section-number">3</div>
+            <h2>مخطط حالات الاستخدام (Use Case Diagram)</h2>
+        </div>
+
+        <div class="diagram-container">
+            <h4>📊 حالات الاستخدام الكاملة للنظام</h4>
+            <div class="mermaid">
+graph LR
+    subgraph "الفاعلون (Actors)"
+        Guest["🙋 زائر<br>Guest"]
+        Individual["👤 مستخدم فردي<br>Individual"]
+        Company["🏢 شركة / معرض<br>Company"]
+        Workshop_User["🔧 ورشة<br>Workshop"]
+        Admin["🛡️ مدير النظام<br>Admin"]
+    end
+
+    subgraph "المصادقة"
+        UC1["تسجيل حساب جديد"]
+        UC2["تسجيل الدخول"]
+        UC3["تسجيل الخروج"]
+        UC4["إعادة تعيين كلمة المرور"]
+    end
+
+    subgraph "إعلانات البيع"
+        UC5["عرض إعلانات البيع"]
+        UC6["إضافة إعلان بيع"]
+        UC7["تعديل إعلان بيع"]
+        UC8["حذف إعلان بيع"]
+        UC9["البحث والتصفية"]
+    end
+
+    subgraph "إعلانات التأجير"
+        UC10["عرض إعلانات التأجير"]
+        UC11["إضافة إعلان تأجير"]
+        UC12["تعديل إعلان تأجير"]
+        UC13["حذف إعلان تأجير"]
+    end
+
+    subgraph "المزادات"
+        UC14["عرض المزادات"]
+        UC15["إنشاء مزاد جديد"]
+        UC16["المزايدة على مزاد"]
+        UC17["إنهاء مزاد منتهي"]
+    end
+
+    subgraph "الورش وطلبات الخدمة"
+        UC18["تسجيل ورشة جديدة"]
+        UC19["تقديم طلب خدمة"]
+        UC20["قبول/رفض طلب خدمة"]
+        UC21["تقييم ورشة"]
+    end
+
+    subgraph "النظام المالي"
+        UC22["شحن المحفظة"]
+        UC23["طلب سحب رصيد"]
+        UC24["الاشتراك الشهري"]
+        UC25["إلغاء الاشتراك"]
+    end
+
+    subgraph "لوحة الإدارة"
+        UC26["عرض الإحصائيات"]
+        UC27["إدارة المستخدمين"]
+        UC28["مراجعة الإعلانات"]
+        UC29["إدارة المزادات"]
+        UC30["إدارة المعاملات المالية"]
+    end
+
+    Guest --> UC1
+    Guest --> UC2
+    Guest --> UC4
+
+    Individual --> UC3
+    Individual --> UC5
+    Individual --> UC6
+    Individual --> UC7
+    Individual --> UC8
+    Individual --> UC9
+    Individual --> UC10
+    Individual --> UC11
+    Individual --> UC14
+    Individual --> UC15
+    Individual --> UC16
+    Individual --> UC19
+    Individual --> UC21
+    Individual --> UC22
+    Individual --> UC23
+    Individual --> UC24
+    Individual --> UC25
+
+    Company --> UC6
+    Company --> UC11
+    Company --> UC15
+    Company --> UC22
+    Company --> UC24
+
+    Workshop_User --> UC18
+    Workshop_User --> UC20
+    Workshop_User --> UC22
+    Workshop_User --> UC24
+
+    Admin --> UC26
+    Admin --> UC27
+    Admin --> UC28
+    Admin --> UC29
+    Admin --> UC30
+    Admin --> UC17
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 4: ER Diagram ==================== -->
+    <div class="section" id="sec4">
+        <div class="section-header">
+            <div class="section-number">4</div>
+            <h2>مخطط الكيانات والعلاقات (ER Diagram)</h2>
+        </div>
+
+        <div class="diagram-container">
+            <h4>🗄️ مخطط قاعدة البيانات الكامل</h4>
+            <div class="mermaid">
+erDiagram
+    account_types {
+        bigint id PK
+        string name UK
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    users {
+        bigint id PK
+        bigint account_type_id FK
+        string name
+        string email UK
+        string phone_number UK
+        timestamp email_verified_at
+        string password
+        boolean is_verified
+        json verification_documents
+        boolean is_subscribed
+        timestamp subscription_ends_at
+        string remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    cars {
+        bigint id PK
+        bigint user_id FK
+        string make
+        string model
+        integer year
+        string condition
+        text description
+        string location
+        json images
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ads {
+        bigint id PK
+        bigint car_id FK
+        bigint user_id FK
+        decimal price
+        string status
+        timestamp published_at
+        timestamp expires_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    rental_ads {
+        bigint id PK
+        bigint car_id FK
+        bigint user_id FK
+        decimal daily_price
+        decimal monthly_price
+        text rental_conditions
+        string location
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    auctions {
+        bigint id PK
+        bigint car_id FK
+        bigint user_id FK
+        decimal starting_price
+        decimal current_price
+        datetime start_time
+        datetime end_time
+        bigint winner_id FK
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    bids {
+        bigint id PK
+        bigint auction_id FK
+        bigint user_id FK
+        decimal amount
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    workshops {
+        bigint id PK
+        bigint user_id FK
+        string name
+        text description
+        string location
+        json services
+        json images
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    service_requests {
+        bigint id PK
+        bigint user_id FK
+        bigint workshop_id FK
+        string title
+        text description
+        string status
+        decimal estimated_cost
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    wallets {
+        bigint id PK
+        bigint user_id FK
+        decimal balance
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    transactions {
+        bigint id PK
+        bigint user_id FK
+        string type
+        decimal amount
+        string status
+        text description
+        bigint transactionable_id
+        string transactionable_type
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    subscriptions {
+        bigint id PK
+        bigint user_id FK
+        decimal amount
+        datetime start_date
+        datetime end_date
+        string status
+        bigint transaction_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    promotions {
+        bigint id PK
+        bigint user_id FK
+        string title
+        text description
+        string type
+        decimal value
+        datetime start_date
+        datetime end_date
+        integer quantity
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ratings {
+        bigint id PK
+        bigint user_id FK
+        bigint rateable_id
+        string rateable_type
+        integer stars
+        text comment
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    account_types ||--o{ users : "has many"
+    users ||--o{ cars : "owns"
+    users ||--o{ ads : "creates"
+    users ||--o{ rental_ads : "creates"
+    users ||--o{ auctions : "creates"
+    users ||--o{ bids : "places"
+    users ||--o| workshops : "owns"
+    users ||--o{ service_requests : "submits"
+    users ||--|| wallets : "has"
+    users ||--o{ transactions : "has"
+    users ||--o{ subscriptions : "has"
+    users ||--o{ promotions : "creates"
+    users ||--o{ ratings : "gives"
+    cars ||--o| ads : "listed in"
+    cars ||--o| rental_ads : "listed in"
+    cars ||--o| auctions : "listed in"
+    auctions ||--o{ bids : "has"
+    workshops ||--o{ service_requests : "receives"
+    transactions ||--o| subscriptions : "linked to"
+            </div>
+        </div>
+
+        <h3>4.1 وصف العلاقات</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>العلاقة</th>
+                    <th>النوع</th>
+                    <th>الوصف</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>User → AccountType</td><td>belongsTo (M:1)</td><td>كل مستخدم ينتمي لنوع حساب واحد</td></tr>
+                <tr><td>User → Cars</td><td>hasMany (1:M)</td><td>كل مستخدم يمتلك عدة سيارات</td></tr>
+                <tr><td>User → Wallet</td><td>hasOne (1:1)</td><td>كل مستخدم له محفظة واحدة</td></tr>
+                <tr><td>User → Workshop</td><td>hasOne (1:1)</td><td>مستخدم الورشة لديه ورشة واحدة فقط</td></tr>
+                <tr><td>Car → Ad</td><td>hasOne (1:1)</td><td>كل سيارة لها إعلان بيع واحد</td></tr>
+                <tr><td>Car → RentalAd</td><td>hasOne (1:1)</td><td>كل سيارة لها إعلان تأجير واحد</td></tr>
+                <tr><td>Car → Auction</td><td>hasOne (1:1)</td><td>كل سيارة في مزاد واحد</td></tr>
+                <tr><td>Auction → Bids</td><td>hasMany (1:M)</td><td>كل مزاد يحتوي على عدة مزايدات</td></tr>
+                <tr><td>Transaction → Transactionable</td><td>morphTo (Polymorphic)</td><td>المعاملات تتعلق بإعلانات أو مزادات أو خدمات</td></tr>
+                <tr><td>Rating → Rateable</td><td>morphTo (Polymorphic)</td><td>التقييمات تتعلق بالورش أو المستخدمين</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SECTION 5: Class Diagram ==================== -->
+    <div class="section" id="sec5">
+        <div class="section-header">
+            <div class="section-number">5</div>
+            <h2>مخطط الفئات (Class Diagram)</h2>
+        </div>
+
+        <div class="diagram-container">
+            <h4>📦 مخطط الفئات الرئيسية</h4>
+            <div class="mermaid">
+classDiagram
+    class User {
+        +int id
+        +int account_type_id
+        +string name
+        +string email
+        +string phone_number
+        +string password
+        +bool is_verified
+        +json verification_documents
+        +bool is_subscribed
+        +datetime subscription_ends_at
+        +accountType() BelongsTo
+        +cars() HasMany
+        +ads() HasMany
+        +rentalAds() HasMany
+        +auctions() HasMany
+        +bids() HasMany
+        +workshop() HasOne
+        +serviceRequests() HasMany
+        +wallet() HasOne
+        +transactions() HasMany
+        +ratings() HasMany
+        +promotions() HasMany
+        +subscriptions() HasMany
+        +hasActiveSubscription() bool
+        +isAdmin() bool
+    }
+
+    class AccountType {
+        +int id
+        +string name
+        +text description
+        +users() HasMany
+    }
+
+    class Car {
+        +int id
+        +int user_id
+        +string make
+        +string model
+        +int year
+        +string condition
+        +text description
+        +string location
+        +json images
+        +user() BelongsTo
+        +ad() HasOne
+        +rentalAd() HasOne
+        +auction() HasOne
+    }
+
+    class Ad {
+        +int id
+        +int car_id
+        +int user_id
+        +decimal price
+        +string status
+        +datetime published_at
+        +datetime expires_at
+        +car() BelongsTo
+        +user() BelongsTo
+        +transactions() MorphMany
+    }
+
+    class Auction {
+        +int id
+        +int car_id
+        +int user_id
+        +decimal starting_price
+        +decimal current_price
+        +datetime start_time
+        +datetime end_time
+        +int winner_id
+        +string status
+        +car() BelongsTo
+        +user() BelongsTo
+        +winner() BelongsTo
+        +bids() HasMany
+        +transactions() MorphMany
+    }
+
+    class Bid {
+        +int id
+        +int auction_id
+        +int user_id
+        +decimal amount
+        +auction() BelongsTo
+        +user() BelongsTo
+    }
+
+    class Workshop {
+        +int id
+        +int user_id
+        +string name
+        +text description
+        +string location
+        +json services
+        +json images
+        +user() BelongsTo
+        +serviceRequests() HasMany
+        +ratings() MorphMany
+    }
+
+    class Wallet {
+        +int id
+        +int user_id
+        +decimal balance
+        +user() BelongsTo
+    }
+
+    class Transaction {
+        +int id
+        +int user_id
+        +string type
+        +decimal amount
+        +string status
+        +text description
+        +transactionable() MorphTo
+        +user() BelongsTo
+    }
+
+    class Subscription {
+        +int id
+        +int user_id
+        +decimal amount
+        +datetime start_date
+        +datetime end_date
+        +string status
+        +int transaction_id
+        +user() BelongsTo
+        +transaction() BelongsTo
+    }
+
+    class Rating {
+        +int id
+        +int user_id
+        +int rateable_id
+        +string rateable_type
+        +int stars
+        +text comment
+        +user() BelongsTo
+        +rateable() MorphTo
+    }
+
+    AccountType "1" -- "*" User
+    User "1" -- "*" Car
+    User "1" -- "1" Wallet
+    User "1" -- "0..1" Workshop
+    User "1" -- "*" Ad
+    User "1" -- "*" Auction
+    User "1" -- "*" Bid
+    User "1" -- "*" Transaction
+    User "1" -- "*" Subscription
+    Car "1" -- "0..1" Ad
+    Car "1" -- "0..1" Auction
+    Auction "1" -- "*" Bid
+    Workshop "1" -- "*" Rating
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 6: Sequence Diagrams ==================== -->
+    <div class="section" id="sec6">
+        <div class="section-header">
+            <div class="section-number">6</div>
+            <h2>مخططات التسلسل (Sequence Diagrams)</h2>
+        </div>
+
+        <h3>6.1 عملية تسجيل مستخدم جديد</h3>
+        <div class="diagram-container">
+            <div class="mermaid">
+sequenceDiagram
+    participant M as 📱 تطبيق الموبايل
+    participant API as 🔌 API Route
+    participant AC as AuthController
+    participant V as Validator
+    participant AT as AccountType Model
+    participant U as User Model
+    participant W as Wallet Model
+    participant DB as 🗄️ Database
+
+    M->>API: POST /api/register
+    API->>AC: register(request)
+    AC->>V: validate(name, email, password, account_type)
+    V-->>AC: validation result
+
+    alt فشل التحقق
+        AC-->>M: 422 Validation Error
+    end
+
+    AC->>AT: where('name', account_type)
+    AT->>DB: SELECT * FROM account_types
+    DB-->>AT: AccountType record
+    AT-->>AC: AccountType object
+
+    AC->>U: create(user_data)
+    U->>DB: INSERT INTO users
+    DB-->>U: User created
+    U-->>AC: User object
+
+    AC->>W: user->wallet->create(balance: 0)
+    W->>DB: INSERT INTO wallets
+    DB-->>W: Wallet created
+
+    AC->>U: createToken('auth_token')
+    U-->>AC: Bearer Token
+
+    AC-->>M: 201 {user, access_token}
+            </div>
+        </div>
+
+        <h3>6.2 عملية إنشاء إعلان بيع</h3>
+        <div class="diagram-container">
+            <div class="mermaid">
+sequenceDiagram
+    participant M as 📱 الموبايل
+    participant MW as 🔐 Sanctum Middleware
+    participant CC as CarController
+    participant U as User Model
+    participant C as Car Model
+    participant A as Ad Model
+    participant S as Storage
+    participant DB as 🗄️ Database
+
+    M->>MW: POST /api/ads (Bearer Token)
+    MW->>MW: التحقق من Token
+    MW->>CC: store(request)
+
+    CC->>U: التحقق من نوع الحساب
+    alt ليس فردي أو شركة
+        CC-->>M: 403 Forbidden
+    end
+
+    CC->>U: hasActiveSubscription()
+    alt لا يوجد اشتراك نشط
+        CC-->>M: 403 يجب الاشتراك أولاً
+    end
+
+    CC->>CC: validate(make, model, year, price, images)
+
+    CC->>C: create(car_data)
+    C->>DB: INSERT INTO cars
+    DB-->>C: Car created
+
+    loop لكل صورة
+        CC->>S: store(image, 'public/cars_images')
+        S-->>CC: image_path
+    end
+
+    CC->>C: update(images)
+    C->>DB: UPDATE cars SET images
+
+    CC->>A: create(car_id, user_id, price, status:pending)
+    A->>DB: INSERT INTO ads
+    DB-->>A: Ad created
+
+    CC-->>M: 201 {ad with car data}
+            </div>
+        </div>
+
+        <h3>6.3 عملية المزايدة على مزاد</h3>
+        <div class="diagram-container">
+            <div class="mermaid">
+sequenceDiagram
+    participant M as 📱 الموبايل
+    participant AC as AuctionController
+    participant A as Auction Model
+    participant B as Bid Model
+    participant DB as 🗄️ Database
+
+    M->>AC: POST /api/auctions/{id}/bid (amount)
+    AC->>A: find(id)
+    A->>DB: SELECT * FROM auctions
+    DB-->>A: Auction record
+
+    alt المزاد غير موجود
+        AC-->>M: 404 Not Found
+    end
+
+    alt المزاد غير نشط أو منتهي
+        AC-->>M: 400 المزاد غير نشط
+    end
+
+    alt المستخدم هو البائع
+        AC-->>M: 403 لا يمكنك المزايدة على مزادك
+    end
+
+    AC->>AC: validate(amount > current_price)
+
+    AC->>DB: BEGIN TRANSACTION
+
+    AC->>A: update(current_price = amount)
+    A->>DB: UPDATE auctions
+
+    AC->>B: create(auction_id, user_id, amount)
+    B->>DB: INSERT INTO bids
+
+    AC->>DB: COMMIT
+
+    AC-->>M: 200 {bid, auction_current_price}
+            </div>
+        </div>
+
+        <h3>6.4 عملية الاشتراك الشهري</h3>
+        <div class="diagram-container">
+            <div class="mermaid">
+sequenceDiagram
+    participant M as 📱 الموبايل
+    participant SC as SubscriptionController
+    participant U as User Model
+    participant W as Wallet Model
+    participant T as Transaction Model
+    participant S as Subscription Model
+    participant DB as 🗄️ Database
+
+    M->>SC: POST /api/subscription/subscribe
+    SC->>U: check accountType
+
+    alt نوع حساب غير مسموح
+        SC-->>M: 403 Forbidden
+    end
+
+    SC->>U: hasActiveSubscription()
+    alt لديه اشتراك نشط
+        SC-->>M: 400 لديك اشتراك بالفعل
+    end
+
+    SC->>W: check balance >= 20000
+    alt رصيد غير كاف
+        SC-->>M: 400 رصيد غير كاف
+    end
+
+    SC->>DB: BEGIN TRANSACTION
+
+    SC->>W: balance -= 20000
+    W->>DB: UPDATE wallets
+
+    SC->>T: create(type:subscription_payment, amount:-20000)
+    T->>DB: INSERT INTO transactions
+
+    SC->>S: create(start_date:now, end_date:+1month, status:active)
+    S->>DB: INSERT INTO subscriptions
+
+    SC->>U: update(is_subscribed:true, subscription_ends_at)
+    U->>DB: UPDATE users
+
+    SC->>DB: COMMIT
+
+    SC-->>M: 200 {subscription_details}
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 7: Component Diagram ==================== -->
+    <div class="section" id="sec7">
+        <div class="section-header">
+            <div class="section-number">7</div>
+            <h2>مخطط المكونات (Component Diagram)</h2>
+        </div>
+
+        <div class="diagram-container">
+            <h4>🧩 مكونات النظام</h4>
+            <div class="mermaid">
+graph TB
+    subgraph "Presentation Layer - طبقة العرض"
+        V1["Blade Views<br>(Admin Dashboard)"]
+        V2["API Responses<br>(JSON for Mobile)"]
+    end
+
+    subgraph "Application Layer - طبقة التطبيق"
+        subgraph "Authentication Module"
+            A1["AuthController"]
+            A2["AdminMiddleware"]
+            A3["Sanctum Guard"]
+        end
+
+        subgraph "Marketplace Module"
+            M1["CarController<br>(Sale Ads)"]
+            M2["RentalAdController<br>(Rental Ads)"]
+            M3["AuctionController<br>(Auctions + Bids)"]
+        end
+
+        subgraph "Service Module"
+            S1["WorkshopController"]
+            S2["ServiceRequestController"]
+        end
+
+        subgraph "Financial Module"
+            F1["WalletController<br>(Charge / Withdraw)"]
+            F2["SubscriptionController<br>(Subscribe / Cancel)"]
+            F3["Commission Logic<br>(2% deduction)"]
+        end
+
+        subgraph "Admin Module"
+            AD1["DashboardController"]
+            AD2["UserController"]
+            AD3["Ad/Auction/Workshop<br>Management"]
+        end
+    end
+
+    subgraph "Domain Layer - طبقة النطاق"
+        D1["User + AccountType"]
+        D2["Car + Ad + RentalAd"]
+        D3["Auction + Bid"]
+        D4["Workshop + ServiceRequest"]
+        D5["Wallet + Transaction"]
+        D6["Subscription + Promotion"]
+        D7["Rating"]
+    end
+
+    subgraph "Infrastructure Layer - طبقة البنية التحتية"
+        I1[("MySQL / SQLite")]
+        I2["File Storage<br>(Cars & Workshop Images)"]
+        I3["Sham Cash API<br>(Payment Gateway)"]
+    end
+
+    V1 --> AD1
+    V2 --> A1
+    V2 --> M1
+    V2 --> M2
+    V2 --> M3
+    V2 --> S1
+    V2 --> F1
+
+    A1 --> D1
+    M1 --> D2
+    M2 --> D2
+    M3 --> D3
+    S1 --> D4
+    S2 --> D4
+    F1 --> D5
+    F2 --> D6
+    AD1 --> D1
+    AD2 --> D1
+    AD3 --> D2
+
+    D1 --> I1
+    D2 --> I1
+    D3 --> I1
+    D4 --> I1
+    D5 --> I1
+    D6 --> I1
+    D7 --> I1
+    D2 --> I2
+    D4 --> I2
+    F1 --> I3
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 8: Activity Diagrams ==================== -->
+    <div class="section" id="sec8">
+        <div class="section-header">
+            <div class="section-number">8</div>
+            <h2>مخططات النشاط (Activity Diagrams)</h2>
+        </div>
+
+        <h3>8.1 دورة حياة إعلان البيع</h3>
+        <div class="diagram-container">
+            <div class="mermaid">
+stateDiagram-v2
+    [*] --> Pending: إنشاء إعلان جديد
+    Pending --> Active: موافقة المدير
+    Pending --> Rejected: رفض المدير
+    Active --> Sold: تم البيع
+    Active --> Pending: تعديل الإعلان
+    Rejected --> [*]: حذف الإعلان
+    Sold --> [*]: انتهى
+            </div>
+        </div>
+
+        <h3>8.2 دورة حياة المزاد</h3>
+        <div class="diagram-container">
+            <div class="mermaid">
+stateDiagram-v2
+    [*] --> Pending: إنشاء مزاد
+    Pending --> Active: تفعيل المدير
+    Pending --> Cancelled: إلغاء
+    Active --> Active: مزايدة جديدة
+    Active --> Closed: انتهاء الوقت + وجود مزايدات
+    Active --> Cancelled: انتهاء الوقت + لا مزايدات
+    Closed --> [*]: تحديد الفائز
+    Cancelled --> [*]: منتهي
+            </div>
+        </div>
+
+        <h3>8.3 دورة حياة طلب الخدمة</h3>
+        <div class="diagram-container">
+            <div class="mermaid">
+stateDiagram-v2
+    [*] --> Pending: تقديم طلب خدمة
+    Pending --> Accepted: قبول الورشة
+    Pending --> Rejected: رفض الورشة
+    Accepted --> Completed: إنهاء الخدمة
+    Accepted --> Cancelled: إلغاء
+    Completed --> Rated: تقييم المستخدم
+    Rejected --> [*]
+    Cancelled --> [*]
+    Rated --> [*]
+            </div>
+        </div>
+
+        <h3>8.4 دورة حياة الاشتراك</h3>
+        <div class="diagram-container">
+            <div class="mermaid">
+stateDiagram-v2
+    [*] --> NoSubscription: مستخدم جديد
+    NoSubscription --> Active: الاشتراك + خصم من المحفظة
+    Active --> Cancelled: إلغاء يدوي
+    Active --> Expired: انتهاء الفترة (Cron Job)
+    Cancelled --> NoSubscription: انتهاء الفترة المتبقية
+    Expired --> NoSubscription: تحديث حالة المستخدم
+    NoSubscription --> Active: إعادة الاشتراك
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 9: Database Tables ==================== -->
+    <div class="section" id="sec9">
+        <div class="section-header">
+            <div class="section-number">9</div>
+            <h2>وصف تفصيلي لجداول قاعدة البيانات</h2>
+        </div>
+
+        <h3>9.1 جدول أنواع الحسابات (account_types)</h3>
+        <table>
+            <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th><th>القيود</th></tr></thead>
+            <tbody>
+                <tr><td>id</td><td>BIGINT</td><td>المفتاح الرئيسي</td><td>AUTO_INCREMENT, PK</td></tr>
+                <tr><td>name</td><td>VARCHAR</td><td>اسم نوع الحساب</td><td>UNIQUE (individual, company, workshop, admin)</td></tr>
+                <tr><td>description</td><td>TEXT</td><td>وصف نوع الحساب</td><td>NULLABLE</td></tr>
+            </tbody>
+        </table>
+
+        <h3>9.2 جدول المستخدمين (users)</h3>
+        <table>
+            <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th><th>القيود</th></tr></thead>
+            <tbody>
+                <tr><td>id</td><td>BIGINT</td><td>المفتاح الرئيسي</td><td>AUTO_INCREMENT, PK</td></tr>
+                <tr><td>account_type_id</td><td>BIGINT</td><td>مفتاح خارجي لنوع الحساب</td><td>FK → account_types(id)</td></tr>
+                <tr><td>name</td><td>VARCHAR</td><td>اسم المستخدم</td><td>NOT NULL</td></tr>
+                <tr><td>email</td><td>VARCHAR</td><td>البريد الإلكتروني</td><td>UNIQUE, NOT NULL</td></tr>
+                <tr><td>phone_number</td><td>VARCHAR</td><td>رقم الهاتف</td><td>UNIQUE, NULLABLE</td></tr>
+                <tr><td>password</td><td>VARCHAR</td><td>كلمة المرور (مشفرة)</td><td>NOT NULL</td></tr>
+                <tr><td>is_verified</td><td>BOOLEAN</td><td>هل تم التوثيق بالوثائق الرسمية</td><td>DEFAULT false</td></tr>
+                <tr><td>verification_documents</td><td>JSON</td><td>مسارات وثائق التوثيق</td><td>NULLABLE</td></tr>
+                <tr><td>is_subscribed</td><td>BOOLEAN</td><td>هل لديه اشتراك نشط</td><td>DEFAULT false</td></tr>
+                <tr><td>subscription_ends_at</td><td>TIMESTAMP</td><td>تاريخ انتهاء الاشتراك</td><td>NULLABLE</td></tr>
+            </tbody>
+        </table>
+
+        <h3>9.3 جدول السيارات (cars)</h3>
+        <table>
+            <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th><th>القيود</th></tr></thead>
+            <tbody>
+                <tr><td>id</td><td>BIGINT</td><td>المفتاح الرئيسي</td><td>PK</td></tr>
+                <tr><td>user_id</td><td>BIGINT</td><td>مالك السيارة</td><td>FK → users(id), ON DELETE CASCADE</td></tr>
+                <tr><td>make</td><td>VARCHAR</td><td>الشركة المصنعة (KIA, Toyota...)</td><td>NOT NULL</td></tr>
+                <tr><td>model</td><td>VARCHAR</td><td>الموديل (Sportage, Camry...)</td><td>NOT NULL</td></tr>
+                <tr><td>year</td><td>INTEGER</td><td>سنة الصنع</td><td>NOT NULL</td></tr>
+                <tr><td>condition</td><td>VARCHAR</td><td>الحالة</td><td>'new' أو 'used'</td></tr>
+                <tr><td>description</td><td>TEXT</td><td>وصف السيارة</td><td>NULLABLE</td></tr>
+                <tr><td>location</td><td>VARCHAR</td><td>مكان السيارة (المدينة)</td><td>NOT NULL</td></tr>
+                <tr><td>images</td><td>JSON</td><td>مصفوفة مسارات الصور</td><td>NULLABLE</td></tr>
+            </tbody>
+        </table>
+
+        <h3>9.4 جدول إعلانات البيع (ads)</h3>
+        <table>
+            <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th><th>القيود</th></tr></thead>
+            <tbody>
+                <tr><td>car_id</td><td>BIGINT</td><td>السيارة المعلن عنها</td><td>FK → cars(id), CASCADE</td></tr>
+                <tr><td>user_id</td><td>BIGINT</td><td>البائع</td><td>FK → users(id), CASCADE</td></tr>
+                <tr><td>price</td><td>DECIMAL(10,2)</td><td>سعر البيع</td><td>NOT NULL</td></tr>
+                <tr><td>status</td><td>VARCHAR</td><td>حالة الإعلان</td><td>pending | active | sold | rejected</td></tr>
+                <tr><td>published_at</td><td>TIMESTAMP</td><td>تاريخ النشر</td><td>NULLABLE</td></tr>
+                <tr><td>expires_at</td><td>TIMESTAMP</td><td>تاريخ الانتهاء</td><td>NULLABLE</td></tr>
+            </tbody>
+        </table>
+
+        <h3>9.5 جدول المزادات (auctions)</h3>
+        <table>
+            <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th><th>القيود</th></tr></thead>
+            <tbody>
+                <tr><td>car_id</td><td>BIGINT</td><td>السيارة في المزاد</td><td>FK, CASCADE</td></tr>
+                <tr><td>user_id</td><td>BIGINT</td><td>البائع</td><td>FK, CASCADE</td></tr>
+                <tr><td>starting_price</td><td>DECIMAL(10,2)</td><td>سعر البدء</td><td>NOT NULL</td></tr>
+                <tr><td>current_price</td><td>DECIMAL(10,2)</td><td>السعر الحالي (أعلى مزايدة)</td><td>NOT NULL</td></tr>
+                <tr><td>start_time</td><td>DATETIME</td><td>وقت بدء المزاد</td><td>NOT NULL</td></tr>
+                <tr><td>end_time</td><td>DATETIME</td><td>وقت انتهاء المزاد</td><td>NOT NULL</td></tr>
+                <tr><td>winner_id</td><td>BIGINT</td><td>الفائز بالمزاد</td><td>FK → users(id), NULLABLE</td></tr>
+                <tr><td>status</td><td>VARCHAR</td><td>حالة المزاد</td><td>pending | active | closed | cancelled</td></tr>
+            </tbody>
+        </table>
+
+        <h3>9.6 جدول المعاملات المالية (transactions)</h3>
+        <div class="info-box">
+            <strong>💡 ملاحظة تقنية:</strong> يستخدم هذا الجدول علاقة <code>Polymorphic</code> عبر الحقلين
+            <code>transactionable_id</code> و <code>transactionable_type</code> مما يسمح بربط المعاملة
+            بأي نموذج (إعلان بيع، مزاد، طلب خدمة).
+        </div>
+        <table>
+            <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th><th>القيود</th></tr></thead>
+            <tbody>
+                <tr><td>user_id</td><td>BIGINT</td><td>المستخدم صاحب المعاملة</td><td>FK, CASCADE</td></tr>
+                <tr><td>type</td><td>VARCHAR</td><td>نوع المعاملة</td><td>charge | debit | withdrawal_request | commission | subscription_payment</td></tr>
+                <tr><td>amount</td><td>DECIMAL(10,2)</td><td>المبلغ (موجب للشحن، سالب للخصم)</td><td>NOT NULL</td></tr>
+                <tr><td>status</td><td>VARCHAR</td><td>حالة المعاملة</td><td>completed | pending | failed</td></tr>
+                <tr><td>transactionable_id</td><td>BIGINT</td><td>معرف العنصر المرتبط</td><td>NULLABLE</td></tr>
+                <tr><td>transactionable_type</td><td>VARCHAR</td><td>نوع النموذج المرتبط</td><td>NULLABLE</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SECTION 10: Models ==================== -->
+    <div class="section" id="sec10">
+        <div class="section-header">
+            <div class="section-number">10</div>
+            <h2>وصف تفصيلي للنماذج (Models)</h2>
+        </div>
+
+        <p>النظام يحتوي على <strong>15 نموذج (Model)</strong> يتم من خلالها التعامل مع قاعدة البيانات عبر Eloquent ORM:</p>
+
+        <div class="file-card">
+            <span class="file-path">app/Models/User.php</span>
+            <h4>نموذج المستخدم - User</h4>
+            <p>النموذج المركزي في النظام. يحتوي على <strong>15 علاقة</strong> مع الكيانات الأخرى. يستخدم <code>HasApiTokens</code> من Sanctum للمصادقة عبر API. يحتوي على دالة <code>isAdmin()</code> للتحقق من صلاحيات المدير ودالة <code>hasActiveSubscription()</code> للتحقق من حالة الاشتراك.</p>
+            <ul>
+                <li><strong>الحقول القابلة للتعبئة:</strong> name, email, phone_number, password, account_type_id, is_verified, verification_documents, is_subscribed, subscription_ends_at</li>
+                <li><strong>العلاقات:</strong> accountType, cars, ads, rentalAds, auctions, bids, workshop, serviceRequests, wallet, transactions, ratings, promotions, subscriptions</li>
+            </ul>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Models/Car.php</span>
+            <h4>نموذج السيارة - Car</h4>
+            <p>يمثل سيارة مسجلة في النظام. يمتلك علاقات <code>hasOne</code> مع كل من Ad (إعلان بيع), RentalAd (إعلان تأجير), و Auction (مزاد). حقل <code>images</code> مخزن كـ JSON يحتوي مصفوفة مسارات الصور.</p>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Models/Ad.php</span>
+            <h4>نموذج إعلان البيع - Ad</h4>
+            <p>يمثل إعلان بيع سيارة. يحتوي على علاقة <code>morphMany</code> مع Transaction لدعم المعاملات المالية المتعددة الأشكال. الحالات: pending → active → sold أو rejected.</p>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Models/Auction.php</span>
+            <h4>نموذج المزاد - Auction</h4>
+            <p>يمثل مزاداً على سيارة. يحتوي على علاقة مع الفائز (<code>winner</code>) وجميع المزايدات (<code>bids</code>). يتتبع السعر الحالي (<code>current_price</code>) مع أوقات البدء والانتهاء.</p>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Models/Bid.php</span>
+            <h4>نموذج المزايدة - Bid</h4>
+            <p>يمثل مزايدة واحدة على مزاد. يرتبط بالمزاد والمزايد. المبلغ يجب أن يكون أعلى من السعر الحالي للمزاد.</p>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Models/Workshop.php</span>
+            <h4>نموذج الورشة - Workshop</h4>
+            <p>يمثل ورشة صيانة. يحتوي على حقول JSON لقائمة الخدمات والصور. يدعم التقييمات عبر علاقة <code>morphMany</code> مع Rating.</p>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Models/Transaction.php</span>
+            <h4>نموذج المعاملة المالية - Transaction</h4>
+            <p>يمثل معاملة مالية (شحن، خصم، عمولة، اشتراك). يستخدم علاقة <code>morphTo</code> ليرتبط بأي نموذج (إعلان، مزاد، طلب خدمة). أنواع المعاملات: charge, debit, withdrawal_request, commission, subscription_payment.</p>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Models/Rating.php</span>
+            <h4>نموذج التقييم - Rating</h4>
+            <p>نظام تقييم من 1 إلى 5 نجوم مع تعليق. يستخدم علاقة <code>morphTo</code> للتقييم على أي كيان (ورشة، مستخدم). حالياً مستخدم خصيصاً لتقييم الورش بعد إتمام الخدمة.</p>
+        </div>
+
+    </div>
+
+    <!-- ==================== SECTION 11: Controllers ==================== -->
+    <div class="section" id="sec11">
+        <div class="section-header">
+            <div class="section-number">11</div>
+            <h2>وصف تفصيلي لوحدات التحكم (Controllers)</h2>
+        </div>
+
+        <h3>11.1 وحدات تحكم الـ API</h3>
+
+        <div class="file-card">
+            <span class="file-path">app/Http/Controllers/Api/AuthController.php</span>
+            <h4>وحدة تحكم المصادقة</h4>
+            <p>تدير عمليات التسجيل وتسجيل الدخول والخروج وعرض بيانات المستخدم.</p>
+            <table>
+                <thead><tr><th>الدالة</th><th>الوصف</th><th>المدخلات</th><th>المخرجات</th></tr></thead>
+                <tbody>
+                    <tr><td><code>register()</code></td><td>تسجيل مستخدم جديد + إنشاء محفظة</td><td>name, email, password, account_type, phone_number</td><td>User object + Bearer Token</td></tr>
+                    <tr><td><code>login()</code></td><td>تسجيل الدخول</td><td>email, password</td><td>User object + Bearer Token</td></tr>
+                    <tr><td><code>logout()</code></td><td>تسجيل الخروج (حذف التوكن)</td><td>Bearer Token</td><td>رسالة نجاح</td></tr>
+                    <tr><td><code>user()</code></td><td>جلب بيانات المستخدم مع نوع الحساب والمحفظة</td><td>Bearer Token</td><td>User + accountType + wallet</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Http/Controllers/Api/CarController.php</span>
+            <h4>وحدة تحكم إعلانات البيع</h4>
+            <p>تدير عمليات CRUD لإعلانات بيع السيارات مع دعم البحث والتصفية المتقدمة.</p>
+            <table>
+                <thead><tr><th>الدالة</th><th>الوصف</th><th>شروط خاصة</th></tr></thead>
+                <tbody>
+                    <tr><td><code>index()</code></td><td>عرض جميع الإعلانات مع فلترة (make, model, price, condition, location, status)</td><td>افتراضياً: الإعلانات النشطة فقط</td></tr>
+                    <tr><td><code>show($id)</code></td><td>عرض تفاصيل إعلان محدد</td><td>يعرض الإعلانات النشطة فقط</td></tr>
+                    <tr><td><code>store()</code></td><td>إضافة إعلان بيع جديد (سيارة + إعلان + صور)</td><td>يتطلب: حساب individual/company + اشتراك نشط</td></tr>
+                    <tr><td><code>update($id)</code></td><td>تعديل إعلان بيع (يشمل تعديل بيانات السيارة والصور)</td><td>فقط مالك الإعلان</td></tr>
+                    <tr><td><code>destroy($id)</code></td><td>حذف إعلان بيع مع الصور والسيارة</td><td>فقط مالك الإعلان</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Http/Controllers/Api/AuctionController.php</span>
+            <h4>وحدة تحكم المزادات</h4>
+            <p>أكبر وحدة تحكم في النظام (424 سطر). تدير دورة حياة المزاد كاملة بما في ذلك المزايدات وإنهاء المزادات المنتهية.</p>
+            <table>
+                <thead><tr><th>الدالة</th><th>الوصف</th><th>شروط خاصة</th></tr></thead>
+                <tbody>
+                    <tr><td><code>index()</code></td><td>عرض جميع المزادات مع فلترة</td><td>ترتيب حسب وقت الانتهاء</td></tr>
+                    <tr><td><code>store()</code></td><td>إنشاء مزاد جديد (DB Transaction)</td><td>يتطلب: اشتراك نشط + duration_hours</td></tr>
+                    <tr><td><code>placeBid($id)</code></td><td>تقديم مزايدة (DB Transaction)</td><td>المبلغ > current_price + لا يمكن للبائع المزايدة</td></tr>
+                    <tr><td><code>update($id)</code></td><td>تحديث المزاد</td><td>المدير يمكنه تغيير الحالة + البائع يعدل قبل التفعيل</td></tr>
+                    <tr><td><code>closeExpiredAuctions()</code></td><td>إنهاء المزادات المنتهية (Cron Job)</td><td>يحدد الفائز أو يلغي المزاد إذا لم توجد مزايدات</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Http/Controllers/Api/WalletController.php</span>
+            <h4>وحدة تحكم المحفظة الإلكترونية</h4>
+            <p>تدير عمليات الشحن والسحب والعمولات. تحتوي على ثابت عمولة التطبيق <code>APP_COMMISSION_RATE = 2%</code>.</p>
+            <table>
+                <thead><tr><th>الدالة</th><th>الوصف</th><th>ملاحظات</th></tr></thead>
+                <tbody>
+                    <tr><td><code>show()</code></td><td>عرض الرصيد وسجل المعاملات</td><td>paginate(10)</td></tr>
+                    <tr><td><code>charge()</code></td><td>شحن المحفظة (Sham Cash API أو كود يدوي)</td><td>الحد الأدنى: 100</td></tr>
+                    <tr><td><code>withdraw()</code></td><td>طلب سحب (يراجعه المدير)</td><td>الحد الأدنى: 1000 + يبقى معلقاً</td></tr>
+                    <tr><td><code>deductCommission()</code></td><td>خصم عمولة التطبيق تلقائياً (static)</td><td>2% من قيمة الصفقة</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Http/Controllers/Api/SubscriptionController.php</span>
+            <h4>وحدة تحكم الاشتراكات</h4>
+            <p>تدير الاشتراكات الشهرية. سعر الاشتراك: <code>20,000 ليرة سورية/شهر</code>. تشمل دالة Cron Job لإنهاء الاشتراكات المنتهية.</p>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Http/Controllers/Api/WorkshopController.php</span>
+            <h4>وحدة تحكم الورش</h4>
+            <p>تدير عمليات CRUD للورش. فقط المستخدمون من نوع <code>workshop</code> يمكنهم التسجيل. كل مستخدم ورشة يمكنه تسجيل ورشة واحدة فقط. تدعم البحث حسب الموقع والخدمات.</p>
+        </div>
+
+        <div class="file-card">
+            <span class="file-path">app/Http/Controllers/Api/ServiceRequestController.php</span>
+            <h4>وحدة تحكم طلبات الخدمة</h4>
+            <p>تربط بين أصحاب السيارات والورش. فقط المستخدمون الأفراد يمكنهم تقديم طلبات. الورش يمكنها قبول/رفض الطلبات. يمكن للمستخدم تقييم الورشة بعد إتمام الخدمة مرة واحدة فقط.</p>
+        </div>
+
+        <h3>11.2 وحدة تحكم لوحة الإدارة</h3>
+        <div class="file-card">
+            <span class="file-path">app/Http/Controllers/Admin/DashboardController.php</span>
+            <h4>لوحة تحكم المدير</h4>
+            <p>تجلب الإحصائيات الرئيسية وتعرضها في لوحة الإدارة:</p>
+            <ul>
+                <li>إجمالي المستخدمين (موثقين / غير موثقين)</li>
+                <li>الإعلانات النشطة والمعلقة</li>
+                <li>المزادات النشطة</li>
+                <li>طلبات الخدمة المعلقة</li>
+                <li>إجمالي الورش</li>
+                <li>إجمالي قيمة المعاملات المالية</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 12: Routes ==================== -->
+    <div class="section" id="sec12">
+        <div class="section-header">
+            <div class="section-number">12</div>
+            <h2>نظام المسارات (Routes)</h2>
+        </div>
+
+        <h3>12.1 مسارات الويب (web.php)</h3>
+        <table>
+            <thead><tr><th>المسار</th><th>الطريقة</th><th>الوصف</th><th>Middleware</th></tr></thead>
+            <tbody>
+                <tr><td><code>/</code></td><td>GET</td><td>الصفحة الرئيسية (welcome)</td><td>-</td></tr>
+                <tr><td><code>/dashboard</code></td><td>GET</td><td>لوحة التحكم (يحول المدير تلقائياً)</td><td>auth, verified</td></tr>
+                <tr><td><code>/profile</code></td><td>GET/PATCH/DELETE</td><td>إدارة الملف الشخصي</td><td>auth</td></tr>
+            </tbody>
+        </table>
+
+        <h3>12.2 مسارات المدير (admin.php)</h3>
+        <div class="info-box">
+            <strong>🛡️ الحماية:</strong> جميع مسارات المدير محمية بـ Middleware: <code>auth</code> + <code>admin</code>
+        </div>
+        <table>
+            <thead><tr><th>المورد</th><th>المسار الأساسي</th><th>العمليات</th></tr></thead>
+            <tbody>
+                <tr><td>لوحة التحكم</td><td><code>/admin/dashboard</code></td><td>GET (index)</td></tr>
+                <tr><td>المستخدمين</td><td><code>/admin/users</code></td><td>CRUD كامل (index, create, store, show, edit, update, destroy)</td></tr>
+                <tr><td>إعلانات البيع</td><td><code>/admin/ads</code></td><td>CRUD كامل</td></tr>
+                <tr><td>إعلانات التأجير</td><td><code>/admin/rental-ads</code></td><td>CRUD كامل</td></tr>
+                <tr><td>المزادات</td><td><code>/admin/auctions</code></td><td>CRUD كامل</td></tr>
+                <tr><td>الورش</td><td><code>/admin/workshops</code></td><td>CRUD كامل</td></tr>
+                <tr><td>طلبات الخدمة</td><td><code>/admin/service-requests</code></td><td>CRUD كامل</td></tr>
+                <tr><td>العروض الترويجية</td><td><code>/admin/promotions</code></td><td>CRUD كامل</td></tr>
+                <tr><td>المعاملات المالية</td><td><code>/admin/transactions</code></td><td>CRUD كامل</td></tr>
+                <tr><td>التقييمات</td><td><code>/admin/ratings</code></td><td>CRUD كامل</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SECTION 13: Auth ==================== -->
+    <div class="section" id="sec13">
+        <div class="section-header">
+            <div class="section-number">13</div>
+            <h2>نظام الصلاحيات والمصادقة</h2>
+        </div>
+
+        <h3>13.1 آلية المصادقة</h3>
+        <p>النظام يستخدم <strong>Laravel Sanctum</strong> لإدارة المصادقة عبر API Tokens:</p>
+        <ul>
+            <li>عند تسجيل الدخول أو التسجيل يتم إنشاء <code>Bearer Token</code></li>
+            <li>يُرسل التوكن في Header كل طلب: <code>Authorization: Bearer {token}</code></li>
+            <li>يتم التحقق عبر Middleware: <code>auth:sanctum</code></li>
+            <li>تسجيل الخروج يحذف التوكن الحالي</li>
+        </ul>
+
+        <h3>13.2 مصفوفة الصلاحيات</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>العملية</th>
+                    <th>👤 فردي</th>
+                    <th>🏢 شركة</th>
+                    <th>🔧 ورشة</th>
+                    <th>🛡️ مدير</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>إنشاء إعلان بيع</td><td>✅ (اشتراك)</td><td>✅ (اشتراك)</td><td>❌</td><td>✅</td></tr>
+                <tr><td>إنشاء إعلان تأجير</td><td>✅ (اشتراك)</td><td>✅ (اشتراك)</td><td>❌</td><td>✅</td></tr>
+                <tr><td>إنشاء مزاد</td><td>✅ (اشتراك)</td><td>✅ (اشتراك)</td><td>❌</td><td>✅</td></tr>
+                <tr><td>المزايدة على مزاد</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                <tr><td>تسجيل ورشة</td><td>❌</td><td>❌</td><td>✅ (مرة واحدة)</td><td>❌</td></tr>
+                <tr><td>تقديم طلب خدمة</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+                <tr><td>قبول/رفض طلب خدمة</td><td>❌</td><td>❌</td><td>✅ (ورشته فقط)</td><td>✅</td></tr>
+                <tr><td>تقييم ورشة</td><td>✅ (بعد الإنجاز)</td><td>❌</td><td>❌</td><td>❌</td></tr>
+                <tr><td>الاشتراك الشهري</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+                <tr><td>شحن المحفظة</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                <tr><td>لوحة الإدارة الكاملة</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            </tbody>
+        </table>
+
+        <h3>13.3 Middleware: AdminMiddleware</h3>
+        <div class="file-card">
+            <span class="file-path">app/Http/Middleware/AdminMiddleware.php</span>
+            <p>يتحقق من أن المستخدم المسجل لديه نوع حساب <code>admin</code> عبر دالة <code>isAdmin()</code> في نموذج User. إذا لم يكن مديراً، يتم تحويله إلى لوحة التحكم العادية مع رسالة خطأ.</p>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 14: API Endpoints ==================== -->
+    <div class="section" id="sec14">
+        <div class="section-header">
+            <div class="section-number">14</div>
+            <h2>واجهة برمجة التطبيقات (API Endpoints)</h2>
+        </div>
+
+        <h3>14.1 نقاط نهاية المصادقة (بدون حماية)</h3>
+        <table>
+            <thead><tr><th>الطريقة</th><th>المسار</th><th>الوصف</th></tr></thead>
+            <tbody>
+                <tr><td><span class="status-badge status-active">POST</span></td><td><code>/api/register</code></td><td>تسجيل مستخدم جديد</td></tr>
+                <tr><td><span class="status-badge status-active">POST</span></td><td><code>/api/login</code></td><td>تسجيل الدخول</td></tr>
+                <tr><td><span class="status-badge status-pending">POST</span></td><td><code>/api/forgot-password</code></td><td>إرسال رابط إعادة تعيين كلمة المرور</td></tr>
+                <tr><td><span class="status-badge status-pending">POST</span></td><td><code>/api/reset-password</code></td><td>إعادة تعيين كلمة المرور</td></tr>
+            </tbody>
+        </table>
+
+        <h3>14.2 نقاط نهاية محمية (auth:sanctum)</h3>
+        <table>
+            <thead><tr><th>الطريقة</th><th>المسار</th><th>الوصف</th></tr></thead>
+            <tbody>
+                <tr><td colspan="3" style="background:#e8f4ff; font-weight:700; text-align:center;">👤 المستخدم</td></tr>
+                <tr><td>POST</td><td><code>/api/logout</code></td><td>تسجيل الخروج</td></tr>
+                <tr><td>GET</td><td><code>/api/user</code></td><td>بيانات المستخدم الحالي</td></tr>
+
+                <tr><td colspan="3" style="background:#e8ffe8; font-weight:700; text-align:center;">🚗 إعلانات البيع</td></tr>
+                <tr><td>GET</td><td><code>/api/ads</code></td><td>عرض الإعلانات (مع فلترة)</td></tr>
+                <tr><td>GET</td><td><code>/api/ads/{id}</code></td><td>تفاصيل إعلان</td></tr>
+                <tr><td>POST</td><td><code>/api/ads</code></td><td>إضافة إعلان بيع</td></tr>
+                <tr><td>PUT</td><td><code>/api/ads/{id}</code></td><td>تعديل إعلان بيع</td></tr>
+                <tr><td>DELETE</td><td><code>/api/ads/{id}</code></td><td>حذف إعلان بيع</td></tr>
+
+                <tr><td colspan="3" style="background:#fff8e1; font-weight:700; text-align:center;">🔑 إعلانات التأجير</td></tr>
+                <tr><td>GET</td><td><code>/api/rental-ads</code></td><td>عرض إعلانات التأجير</td></tr>
+                <tr><td>GET</td><td><code>/api/rental-ads/{id}</code></td><td>تفاصيل إعلان تأجير</td></tr>
+                <tr><td>POST</td><td><code>/api/rental-ads</code></td><td>إضافة إعلان تأجير</td></tr>
+                <tr><td>PUT</td><td><code>/api/rental-ads/{id}</code></td><td>تعديل إعلان تأجير</td></tr>
+                <tr><td>DELETE</td><td><code>/api/rental-ads/{id}</code></td><td>حذف إعلان تأجير</td></tr>
+
+                <tr><td colspan="3" style="background:#f0e6ff; font-weight:700; text-align:center;">🔨 المزادات</td></tr>
+                <tr><td>GET</td><td><code>/api/auctions</code></td><td>عرض المزادات</td></tr>
+                <tr><td>GET</td><td><code>/api/auctions/{id}</code></td><td>تفاصيل مزاد</td></tr>
+                <tr><td>POST</td><td><code>/api/auctions</code></td><td>إنشاء مزاد</td></tr>
+                <tr><td>POST</td><td><code>/api/auctions/{id}/bid</code></td><td>المزايدة</td></tr>
+                <tr><td>PUT</td><td><code>/api/auctions/{id}</code></td><td>تعديل مزاد</td></tr>
+                <tr><td>DELETE</td><td><code>/api/auctions/{id}</code></td><td>حذف مزاد</td></tr>
+
+                <tr><td colspan="3" style="background:#e8f0ff; font-weight:700; text-align:center;">🔧 الورش وطلبات الخدمة</td></tr>
+                <tr><td>GET</td><td><code>/api/workshops</code></td><td>عرض الورش</td></tr>
+                <tr><td>POST</td><td><code>/api/workshops</code></td><td>تسجيل ورشة</td></tr>
+                <tr><td>GET</td><td><code>/api/service-requests</code></td><td>عرض طلبات الخدمة</td></tr>
+                <tr><td>POST</td><td><code>/api/service-requests</code></td><td>تقديم طلب خدمة</td></tr>
+                <tr><td>PUT</td><td><code>/api/service-requests/{id}/status</code></td><td>تحديث حالة الطلب</td></tr>
+                <tr><td>POST</td><td><code>/api/service-requests/{id}/rate</code></td><td>تقييم ورشة</td></tr>
+
+                <tr><td colspan="3" style="background:#ffe8e8; font-weight:700; text-align:center;">💳 المالية والاشتراكات</td></tr>
+                <tr><td>GET</td><td><code>/api/wallet</code></td><td>عرض المحفظة</td></tr>
+                <tr><td>POST</td><td><code>/api/wallet/charge</code></td><td>شحن المحفظة</td></tr>
+                <tr><td>POST</td><td><code>/api/wallet/withdraw</code></td><td>طلب سحب</td></tr>
+                <tr><td>GET</td><td><code>/api/subscription</code></td><td>حالة الاشتراك</td></tr>
+                <tr><td>POST</td><td><code>/api/subscription/subscribe</code></td><td>الاشتراك</td></tr>
+                <tr><td>POST</td><td><code>/api/subscription/cancel</code></td><td>إلغاء الاشتراك</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SECTION 15: Views ==================== -->
+    <div class="section" id="sec15">
+        <div class="section-header">
+            <div class="section-number">15</div>
+            <h2>طبقة العرض (Views)</h2>
+        </div>
+
+        <h3>15.1 الواجهة الإدارية (Admin Dashboard)</h3>
+        <p>مبنية على Blade Templates مع تخطيط <code>x-app-layout</code>. تعرض بطاقات إحصائية (Grid) تشمل:</p>
+        <ul>
+            <li>إجمالي المستخدمين (موثقين وغير موثقين)</li>
+            <li>الإعلانات النشطة والمعلقة</li>
+            <li>المزادات النشطة</li>
+            <li>طلبات الخدمة المعلقة</li>
+            <li>إجمالي الورش</li>
+            <li>إجمالي قيمة المعاملات</li>
+        </ul>
+
+        <h3>15.2 شريط التنقل (Navigation)</h3>
+        <div class="file-card">
+            <span class="file-path">resources/views/layouts/navigation.blade.php</span>
+            <p>شريط التنقل ذكي - يعرض روابط الإدارة فقط للمستخدمين من نوع Admin عبر شرط <code>@if(Auth::user()->isAdmin())</code>. يحتوي على 11 رابط إداري في القائمة (لوحة التحكم، المستخدمين، الإعلانات، المزادات، الورش، طلبات الخدمة، العروض، المعاملات، الرسائل، التقييمات). يدعم التصميم المتجاوب (Responsive) مع قائمة Hamburger للشاشات الصغيرة.</p>
+        </div>
+
+        <h3>15.3 لوحة التحكم العادية</h3>
+        <div class="file-card">
+            <span class="file-path">resources/views/dashboard.blade.php</span>
+            <p>الصفحة التي يراها المستخدمون العاديون بعد تسجيل الدخول. تعرض رسالة ترحيب ونوع الحساب الحالي. مع تعديل المسارات، يتم تحويل المدير تلقائياً إلى لوحة الإدارة.</p>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ ملاحظات مهمة عن النظام:</strong>
+            <ul>
+                <li>دالة <code>closeExpiredAuctions()</code> في AuctionController تحتاج لإعداد Cron Job لتشغيلها دورياً</li>
+                <li>دالة <code>expireSubscriptions()</code> في SubscriptionController تحتاج لإعداد Cron Job أيضاً</li>
+                <li>نظام الإشعارات (Notifications) معلّق حالياً ولم يتم تفعيله بعد</li>
+                <li>تكامل Sham Cash API حالياً وهمي (Dummy) ويحتاج لربط حقيقي</li>
+                <li>نظام كود الشحن اليدوي يقبل فقط الكود "12345" للاختبار</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <div style="background: #1a1a2e; color: white; padding: 40px; text-align: center; page-break-before: always;">
+        <h2 style="color: #a8dadc; margin-bottom: 20px;">🚗 Syria Motor Second</h2>
+        <p style="color: #888; font-size: 1em;">وثيقة تحليل شاملة لهندسة البرمجيات</p>
+        <p style="color: #888; font-size: 0.9em; margin-top: 15px;">تم إنشاء هذه الوثيقة آلياً بتاريخ 11 أبريل 2026</p>
+        <p style="color: #666; font-size: 0.8em; margin-top: 10px;">Laravel 10 | PHP 8.x | Sanctum | Blade | Tailwind CSS</p>
+        <hr style="border-color: #333; margin: 20px 0;">
+        <p style="color: #555; font-size: 0.85em;">عدد النماذج: 15 | عدد وحدات التحكم API: 8 | عدد جداول قاعدة البيانات: 15 | عدد مسارات API: 28+</p>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: true,
+                wrap: true
+            }
+        });
+    </script>
+</body>
+</html>

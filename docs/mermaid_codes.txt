@@ -1,0 +1,872 @@
+================================================================================
+SYRIA MOTOR SECOND - THE EXACT FULL MERMAID CODES (FROM SYSTEM ANALYSIS FILE)
+================================================================================
+
+1. المخطط المعماري العام (Project Architecture)
+-----------------------------------------------
+graph TB
+    subgraph "Client Layer"
+        A["📱 تطبيق الموبايل<br>(Flutter/React Native)"]
+        B["🌐 المتصفح<br>(Admin Dashboard)"]
+    end
+
+    subgraph "API Layer"
+        C["🔌 REST API<br>api.php Routes"]
+        D["🌐 Web Routes<br>web.php + admin.php"]
+    end
+
+    subgraph "Middleware Layer"
+        E["🔐 auth:sanctum"]
+        F["🛡️ AdminMiddleware"]
+        G["✅ VerifyCsrfToken"]
+    end
+
+    subgraph "Controller Layer"
+        H["AuthController"]
+        I["CarController"]
+        J["AuctionController"]
+        K["RentalAdController"]
+        L["WalletController"]
+        M["WorkshopController"]
+        N["ServiceRequestController"]
+        O["SubscriptionController"]
+        P["Admin Controllers"]
+    end
+
+    subgraph "Model Layer (Eloquent ORM)"
+        Q["User"] 
+        R["Car"]
+        S["Ad"]
+        T["Auction / Bid"]
+        U["RentalAd"]
+        V["Workshop"]
+        W["ServiceRequest"]
+        X["Wallet / Transaction"]
+        Y["Subscription"]
+        Z["Rating"]
+    end
+
+    subgraph "Database Layer"
+        DB[("🗄️ MySQL/SQLite<br>Database")]
+    end
+
+    A --> C
+    B --> D
+    C --> E
+    D --> F
+    D --> G
+    E --> H
+    E --> I
+    E --> J
+    E --> K
+    E --> L
+    E --> M
+    E --> N
+    E --> O
+    F --> P
+    H --> Q
+    I --> R
+    I --> S
+    J --> T
+    K --> U
+    M --> V
+    N --> W
+    L --> X
+    O --> Y
+    P --> Q
+    Q --> DB
+    R --> DB
+    S --> DB
+    T --> DB
+    U --> DB
+    V --> DB
+    W --> DB
+    X --> DB
+    Y --> DB
+    Z --> DB
+
+--------------------------------------------------------------------------------
+
+2. مخطط حالات الاستخدام (Use Case Diagram)
+-----------------------------------------------
+graph LR
+    subgraph "الفاعلون (Actors)"
+        Guest["🙋 زائر<br>Guest"]
+        Individual["👤 مستخدم فردي<br>Individual"]
+        Company["🏢 شركة / معرض<br>Company"]
+        Workshop_User["🔧 ورشة<br>Workshop"]
+        Admin["🛡️ مدير النظام<br>Admin"]
+    end
+
+    subgraph "المصادقة"
+        UC1["تسجيل حساب جديد"]
+        UC2["تسجيل الدخول"]
+        UC3["تسجيل الخروج"]
+        UC4["إعادة تعيين كلمة المرور"]
+    end
+
+    subgraph "إعلانات البيع"
+        UC5["عرض إعلانات البيع"]
+        UC6["إضافة إعلان بيع"]
+        UC7["تعديل إعلان بيع"]
+        UC8["حذف إعلان بيع"]
+        UC9["البحث والتصفية"]
+    end
+
+    subgraph "إعلانات التأجير"
+        UC10["عرض إعلانات التأجير"]
+        UC11["إضافة إعلان تأجير"]
+        UC12["تعديل إعلان تأجير"]
+        UC13["حذف إعلان تأجير"]
+    end
+
+    subgraph "المزادات"
+        UC14["عرض المزادات"]
+        UC15["إنشاء مزاد جديد"]
+        UC16["المزايدة على مزاد"]
+        UC17["إنهاء مزاد منتهي"]
+    end
+
+    subgraph "الورش وطلبات الخدمة"
+        UC18["تسجيل ورشة جديدة"]
+        UC19["تقديم طلب خدمة"]
+        UC20["قبول/رفض طلب خدمة"]
+        UC21["تقييم ورشة"]
+    end
+
+    subgraph "النظام المالي"
+        UC22["شحن المحفظة"]
+        UC23["طلب سحب رصيد"]
+        UC24["الاشتراك الشهري"]
+        UC25["إلغاء الاشتراك"]
+    end
+
+    subgraph "لوحة الإدارة"
+        UC26["عرض الإحصائيات"]
+        UC27["إدارة المستخدمين"]
+        UC28["مراجعة الإعلانات"]
+        UC29["إدارة المزادات"]
+        UC30["إدارة المعاملات المالية"]
+    end
+
+    Guest --> UC1
+    Guest --> UC2
+    Guest --> UC4
+
+    Individual --> UC3
+    Individual --> UC5
+    Individual --> UC6
+    Individual --> UC7
+    Individual --> UC8
+    Individual --> UC9
+    Individual --> UC10
+    Individual --> UC11
+    Individual --> UC14
+    Individual --> UC15
+    Individual --> UC16
+    Individual --> UC19
+    Individual --> UC21
+    Individual --> UC22
+    Individual --> UC23
+    Individual --> UC24
+    Individual --> UC25
+
+    Company --> UC6
+    Company --> UC11
+    Company --> UC15
+    Company --> UC22
+    Company --> UC24
+
+    Workshop_User --> UC18
+    Workshop_User --> UC20
+    Workshop_User --> UC22
+    Workshop_User --> UC24
+
+    Admin --> UC26
+    Admin --> UC27
+    Admin --> UC28
+    Admin --> UC29
+    Admin --> UC30
+    Admin --> UC17
+
+--------------------------------------------------------------------------------
+
+3. مخطط الكيانات والعلاقات الكامل (ER Diagram)
+-----------------------------------------------
+erDiagram
+    account_types {
+        bigint id PK
+        string name UK
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    users {
+        bigint id PK
+        bigint account_type_id FK
+        string name
+        string email UK
+        string phone_number UK
+        timestamp email_verified_at
+        string password
+        boolean is_verified
+        json verification_documents
+        boolean is_subscribed
+        timestamp subscription_ends_at
+        string remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    cars {
+        bigint id PK
+        bigint user_id FK
+        string make
+        string model
+        integer year
+        string condition
+        text description
+        string location
+        json images
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ads {
+        bigint id PK
+        bigint car_id FK
+        bigint user_id FK
+        decimal price
+        string status
+        timestamp published_at
+        timestamp expires_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    rental_ads {
+        bigint id PK
+        bigint car_id FK
+        bigint user_id FK
+        decimal daily_price
+        decimal monthly_price
+        text rental_conditions
+        string location
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    auctions {
+        bigint id PK
+        bigint car_id FK
+        bigint user_id FK
+        decimal starting_price
+        decimal current_price
+        datetime start_time
+        datetime end_time
+        bigint winner_id FK
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    bids {
+        bigint id PK
+        bigint auction_id FK
+        bigint user_id FK
+        decimal amount
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    workshops {
+        bigint id PK
+        bigint user_id FK
+        string name
+        text description
+        string location
+        json services
+        json images
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    service_requests {
+        bigint id PK
+        bigint user_id FK
+        bigint workshop_id FK
+        string title
+        text description
+        string status
+        decimal estimated_cost
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    wallets {
+        bigint id PK
+        bigint user_id FK
+        decimal balance
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    transactions {
+        bigint id PK
+        bigint user_id FK
+        string type
+        decimal amount
+        string status
+        text description
+        bigint transactionable_id
+        string transactionable_type
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    subscriptions {
+        bigint id PK
+        bigint user_id FK
+        decimal amount
+        datetime start_date
+        datetime end_date
+        string status
+        bigint transaction_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    promotions {
+        bigint id PK
+        bigint user_id FK
+        string title
+        text description
+        string type
+        decimal value
+        datetime start_date
+        datetime end_date
+        integer quantity
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ratings {
+        bigint id PK
+        bigint user_id FK
+        bigint rateable_id
+        string rateable_type
+        integer stars
+        text comment
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    account_types ||--o{ users : "has many"
+    users ||--o{ cars : "owns"
+    users ||--o{ ads : "creates"
+    users ||--o{ rental_ads : "creates"
+    users ||--o{ auctions : "creates"
+    users ||--o{ bids : "places"
+    users ||--o| workshops : "owns"
+    users ||--o{ service_requests : "submits"
+    users ||--|| wallets : "has"
+    users ||--o{ transactions : "has"
+    users ||--o{ subscriptions : "has"
+    users ||--o{ promotions : "creates"
+    users ||--o{ ratings : "gives"
+    cars ||--o| ads : "listed in"
+    cars ||--o| rental_ads : "listed in"
+    cars ||--o| auctions : "listed in"
+    auctions ||--o{ bids : "has"
+    workshops ||--o{ service_requests : "receives"
+    transactions ||--o| subscriptions : "linked to"
+
+--------------------------------------------------------------------------------
+
+4. مخطط الفئات - البرمجة (Class Diagram)
+-----------------------------------------------
+classDiagram
+    class User {
+        +int id
+        +int account_type_id
+        +string name
+        +string email
+        +string phone_number
+        +string password
+        +bool is_verified
+        +json verification_documents
+        +bool is_subscribed
+        +datetime subscription_ends_at
+        +accountType() BelongsTo
+        +cars() HasMany
+        +ads() HasMany
+        +rentalAds() HasMany
+        +auctions() HasMany
+        +bids() HasMany
+        +workshop() HasOne
+        +serviceRequests() HasMany
+        +wallet() HasOne
+        +transactions() HasMany
+        +ratings() HasMany
+        +promotions() HasMany
+        +subscriptions() HasMany
+        +hasActiveSubscription() bool
+        +isAdmin() bool
+    }
+
+    class AccountType {
+        +int id
+        +string name
+        +text description
+        +users() HasMany
+    }
+
+    class Car {
+        +int id
+        +int user_id
+        +string make
+        +string model
+        +int year
+        +string condition
+        +text description
+        +string location
+        +json images
+        +user() BelongsTo
+        +ad() HasOne
+        +rentalAd() HasOne
+        +auction() HasOne
+    }
+
+    class Ad {
+        +int id
+        +int car_id
+        +int user_id
+        +decimal price
+        +string status
+        +datetime published_at
+        +datetime expires_at
+        +car() BelongsTo
+        +user() BelongsTo
+        +transactions() MorphMany
+    }
+
+    class Auction {
+        +int id
+        +int car_id
+        +int user_id
+        +decimal starting_price
+        +decimal current_price
+        +datetime start_time
+        +datetime end_time
+        +int winner_id
+        +string status
+        +car() BelongsTo
+        +user() BelongsTo
+        +winner() BelongsTo
+        +bids() HasMany
+        +transactions() MorphMany
+    }
+
+    class Bid {
+        +int id
+        +int auction_id
+        +int user_id
+        +decimal amount
+        +auction() BelongsTo
+        +user() BelongsTo
+    }
+
+    class Workshop {
+        +int id
+        +int user_id
+        +string name
+        +text description
+        +string location
+        +json services
+        +json images
+        +user() BelongsTo
+        +serviceRequests() HasMany
+        +ratings() MorphMany
+    }
+
+    class Wallet {
+        +int id
+        +int user_id
+        +decimal balance
+        +user() BelongsTo
+    }
+
+    class Transaction {
+        +int id
+        +int user_id
+        +string type
+        +decimal amount
+        +string status
+        +text description
+        +transactionable() MorphTo
+        +user() BelongsTo
+    }
+
+    class Subscription {
+        +int id
+        +int user_id
+        +decimal amount
+        +datetime start_date
+        +datetime end_date
+        +string status
+        +int transaction_id
+        +user() BelongsTo
+        +transaction() BelongsTo
+    }
+
+    class Rating {
+        +int id
+        +int user_id
+        +int rateable_id
+        +string rateable_type
+        +int stars
+        +text comment
+        +user() BelongsTo
+        +rateable() MorphTo
+    }
+
+    AccountType "1" -- "*" User
+    User "1" -- "*" Car
+    User "1" -- "1" Wallet
+    User "1" -- "0..1" Workshop
+    User "1" -- "*" Ad
+    User "1" -- "*" Auction
+    User "1" -- "*" Bid
+    User "1" -- "*" Transaction
+    User "1" -- "*" Subscription
+    Car "1" -- "0..1" Ad
+    Car "1" -- "0..1" Auction
+    Auction "1" -- "*" Bid
+    Workshop "1" -- "*" Rating
+
+--------------------------------------------------------------------------------
+
+5. مخطط التسلسل - تسجيل مستخدم جديد
+-----------------------------------------------
+sequenceDiagram
+    participant M as 📱 تطبيق الموبايل
+    participant API as 🔌 API Route
+    participant AC as AuthController
+    participant V as Validator
+    participant AT as AccountType Model
+    participant U as User Model
+    participant W as Wallet Model
+    participant DB as 🗄️ Database
+
+    M->>API: POST /api/register
+    API->>AC: register(request)
+    AC->>V: validate(name, email, password, account_type)
+    V-->>AC: validation result
+
+    alt فشل التحقق
+        AC-->>M: 422 Validation Error
+    end
+
+    AC->>AT: where('name', account_type)
+    AT->>DB: SELECT * FROM account_types
+    DB-->>AT: AccountType record
+    AT-->>AC: AccountType object
+
+    AC->>U: create(user_data)
+    U->>DB: INSERT INTO users
+    DB-->>U: User created
+    U-->>AC: User object
+
+    AC->>W: user->wallet->create(balance: 0)
+    W->>DB: INSERT INTO wallets
+    DB-->>W: Wallet created
+
+    AC->>U: createToken('auth_token')
+    U-->>AC: Bearer Token
+
+    AC-->>M: 201 {user, access_token}
+
+--------------------------------------------------------------------------------
+
+6. مخطط التسلسل - إنشاء إعلان بيع
+-----------------------------------------------
+sequenceDiagram
+    participant M as 📱 الموبايل
+    participant MW as 🔐 Sanctum Middleware
+    participant CC as CarController
+    participant U as User Model
+    participant C as Car Model
+    participant A as Ad Model
+    participant S as Storage
+    participant DB as 🗄️ Database
+
+    M->>MW: POST /api/ads (Bearer Token)
+    MW->>MW: التحقق من Token
+    MW->>CC: store(request)
+
+    CC->>U: التحقق من نوع الحساب
+    alt ليس فردي أو شركة
+        CC-->>M: 403 Forbidden
+    end
+
+    CC->>U: hasActiveSubscription()
+    alt لا يوجد اشتراك نشط
+        CC-->>M: 403 يجب الاشتراك أولاً
+    end
+
+    CC->>CC: validate(make, model, year, price, images)
+
+    CC->>C: create(car_data)
+    C->>DB: INSERT INTO cars
+    DB-->>C: Car created
+
+    loop لكل صورة
+        CC->>S: store(image, 'public/cars_images')
+        S-->>CC: image_path
+    end
+
+    CC->>C: update(images)
+    C->>DB: UPDATE cars SET images
+
+    CC->>A: create(car_id, user_id, price, status:pending)
+    A->>DB: INSERT INTO ads
+    DB-->>A: Ad created
+
+    CC-->>M: 201 {ad with car data}
+
+--------------------------------------------------------------------------------
+
+7. مخطط التسلسل - تقديم مزايدة
+-----------------------------------------------
+sequenceDiagram
+    participant M as 📱 الموبايل
+    participant AC as AuctionController
+    participant A as Auction Model
+    participant B as Bid Model
+    participant DB as 🗄️ Database
+
+    M->>AC: POST /api/auctions/{id}/bid (amount)
+    AC->>A: find(id)
+    A->>DB: SELECT * FROM auctions
+    DB-->>A: Auction record
+
+    alt المزاد غير موجود
+        AC-->>M: 404 Not Found
+    end
+
+    alt المزاد غير نشط أو منتهي
+        AC-->>M: 400 المزاد غير نشط
+    end
+
+    alt المستخدم هو البائع
+        AC-->>M: 403 لا يمكنك المزايدة على مزادك
+    end
+
+    AC->>AC: validate(amount > current_price)
+
+    AC->>DB: BEGIN TRANSACTION
+
+    AC->>A: update(current_price = amount)
+    A->>DB: UPDATE auctions
+
+    AC->>B: create(auction_id, user_id, amount)
+    B->>DB: INSERT INTO bids
+
+    AC->>DB: COMMIT
+
+    AC-->>M: 200 {bid, auction_current_price}
+
+--------------------------------------------------------------------------------
+
+8. مخطط التسلسل - الاشتراك الشهري
+-----------------------------------------------
+sequenceDiagram
+    participant M as 📱 الموبايل
+    participant SC as SubscriptionController
+    participant U as User Model
+    participant W as Wallet Model
+    participant T as Transaction Model
+    participant S as Subscription Model
+    participant DB as 🗄️ Database
+
+    M->>SC: POST /api/subscription/subscribe
+    SC->>U: check accountType
+
+    alt نوع حساب غير مسموح
+        SC-->>M: 403 Forbidden
+    end
+
+    SC->>U: hasActiveSubscription()
+    alt لديه اشتراك نشط
+        SC-->>M: 400 لديك اشتراك بالفعل
+    end
+
+    SC->>W: check balance >= 20000
+    alt رصيد غير كاف
+        SC-->>M: 400 رصيد غير كاف
+    end
+
+    SC->>DB: BEGIN TRANSACTION
+
+    SC->>W: balance -= 20000
+    W->>DB: UPDATE wallets
+
+    SC->>T: create(type:subscription_payment, amount:-20000)
+    T->>DB: INSERT INTO transactions
+
+    SC->>S: create(start_date:now, end_date:+1month, status:active)
+    S->>DB: INSERT INTO subscriptions
+
+    SC->>U: update(is_subscribed:true, subscription_ends_at)
+    U->>DB: UPDATE users
+
+    SC->>DB: COMMIT
+
+    SC-->>M: 200 {subscription_details}
+
+--------------------------------------------------------------------------------
+
+9. مخطط المكونات (Component Diagram)
+-----------------------------------------------
+graph TB
+    subgraph "Presentation Layer - طبقة العرض"
+        V1["Blade Views<br>(Admin Dashboard)"]
+        V2["API Responses<br>(JSON for Mobile)"]
+    end
+
+    subgraph "Application Layer - طبقة التطبيق"
+        subgraph "Authentication Module"
+            A1["AuthController"]
+            A2["AdminMiddleware"]
+            A3["Sanctum Guard"]
+        end
+
+        subgraph "Marketplace Module"
+            M1["CarController<br>(Sale Ads)"]
+            M2["RentalAdController<br>(Rental Ads)"]
+            M3["AuctionController<br>(Auctions + Bids)"]
+        end
+
+        subgraph "Service Module"
+            S1["WorkshopController"]
+            S2["ServiceRequestController"]
+        end
+
+        subgraph "Financial Module"
+            F1["WalletController<br>(Charge / Withdraw)"]
+            F2["SubscriptionController<br>(Subscribe / Cancel)"]
+            F3["Commission Logic<br>(2% deduction)"]
+        end
+
+        subgraph "Admin Module"
+            AD1["DashboardController"]
+            AD2["UserController"]
+            AD3["Ad/Auction/Workshop<br>Management"]
+        end
+    end
+
+    subgraph "Domain Layer - طبقة النطاق"
+        D1["User + AccountType"]
+        D2["Car + Ad + RentalAd"]
+        D3["Auction + Bid"]
+        D4["Workshop + ServiceRequest"]
+        D5["Wallet + Transaction"]
+        D6["Subscription + Promotion"]
+        D7["Rating"]
+    end
+
+    subgraph "Infrastructure Layer - طبقة البنية التحتية"
+        I1[("MySQL / SQLite")]
+        I2["File Storage<br>(Cars & Workshop Images)"]
+        I3["Sham Cash API<br>(Payment Gateway)"]
+    end
+
+    V1 --> AD1
+    V2 --> A1
+    V2 --> M1
+    V2 --> M2
+    V2 --> M3
+    V2 --> S1
+    V2 --> F1
+
+    A1 --> D1
+    M1 --> D2
+    M2 --> D2
+    M3 --> D3
+    S1 --> D4
+    S2 --> D4
+    F1 --> D5
+    F2 --> D6
+    AD1 --> D1
+    AD2 --> D1
+    AD3 --> D2
+
+    D1 --> I1
+    D2 --> I1
+    D3 --> I1
+    D4 --> I1
+    D5 --> I1
+    D6 --> I1
+    D7 --> I1
+    D2 --> I2
+    D4 --> I2
+    F1 --> I3
+
+--------------------------------------------------------------------------------
+
+10. مخطط النشاط - إعلان بيع
+-----------------------------------------------
+stateDiagram-v2
+    [*] --> Pending: إنشاء إعلان جديد
+    Pending --> Active: موافقة المدير
+    Pending --> Rejected: رفض المدير
+    Active --> Sold: تم البيع
+    Active --> Pending: تعديل الإعلان
+    Rejected --> [*]: حذف الإعلان
+    Sold --> [*]: انتهى
+
+--------------------------------------------------------------------------------
+
+11. مخطط النشاط - المزاد
+-----------------------------------------------
+stateDiagram-v2
+    [*] --> Pending: إنشاء مزاد
+    Pending --> Active: تفعيل المدير
+    Pending --> Cancelled: إلغاء
+    Active --> Active: مزايدة جديدة
+    Active --> Closed: انتهاء الوقت + وجود مزايدات
+    Active --> Cancelled: انتهاء الوقت + لا مزايدات
+    Closed --> [*]: تحديد الفائز
+    Cancelled --> [*]: منتهي
+
+--------------------------------------------------------------------------------
+
+12. مخطط النشاط - طلب الخدمة
+-----------------------------------------------
+stateDiagram-v2
+    [*] --> Pending: تقديم طلب خدمة
+    Pending --> Accepted: قبول الورشة
+    Pending --> Rejected: رفض الورشة
+    Accepted --> Completed: إنهاء الخدمة
+    Accepted --> Cancelled: إلغاء
+    Completed --> Rated: تقييم المستخدم
+    Rejected --> [*]
+    Cancelled --> [*]
+    Rated --> [*]
+
+--------------------------------------------------------------------------------
+
+13. مخطط النشاط - الاشتراك الشهري
+-----------------------------------------------
+stateDiagram-v2
+    [*] --> NoSubscription: مستخدم جديد
+    NoSubscription --> Active: الاشتراك + خصم من المحفظة
+    Active --> Cancelled: إلغاء يدوي
+    Active --> Expired: انتهاء الفترة (Cron Job)
+    Cancelled --> NoSubscription: انتهاء الفترة المتبقية
+    Expired --> NoSubscription: تحديث حالة المستخدم
+    NoSubscription --> Active: إعادة الاشتراك
+================================================================================
