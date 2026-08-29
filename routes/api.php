@@ -26,6 +26,13 @@ use App\Http\Controllers\Api\StripePaymentController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Admin\WalletAdminController;
 use App\Http\Controllers\Admin\AuctionController as AdminAuctionController;
+use App\Http\Controllers\Admin\ModerationController as AdminModerationController;
+use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\UserSearchController;
+use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\BlockController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\DisputeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -108,12 +115,52 @@ Route::get('/rental-ads/{id}', [RentalAdController::class, 'show']); // عرض �
     Route::put('/rental-ads/{id}', [RentalAdController::class, 'update']); // تحديث إعلان تأجير
     Route::delete('/rental-ads/{id}', [RentalAdController::class, 'destroy']); // حذف إعلان تأجير
 
+    // ⬅️ جديد: أيام عدم التوفر (تحديد الأيام التي تكون فيها السيارة غير متاحة للتأجير)
+    Route::get('/rental-ads/{id}/availability', [RentalAdController::class, 'availability']); // الأيام المحجوزة + المحجوبة يدوياً (عام لأي مستخدم مسجل)
+    Route::post('/rental-ads/{id}/unavailable-dates', [RentalAdController::class, 'addUnavailableDates']); // المالك يحجب فترة أيام
+    Route::delete('/rental-ads/{id}/unavailable-dates/{unavailabilityId}', [RentalAdController::class, 'removeUnavailableDates']); // المالك يلغي حجب فترة
+
     Route::post('/rental-bookings', [RentalBookingController::class, 'store']); // إنشاء طلب حجز جديد (pending)
     Route::get('/rental-bookings/my', [RentalBookingController::class, 'myBookings']); // حجوزاتي (كمستأجر)
     Route::get('/rental-bookings/incoming', [RentalBookingController::class, 'incomingBookings']); // الطلبات الواردة على إعلاناتي (كمالك)
     Route::post('/rental-bookings/{id}/approve', [RentalBookingController::class, 'approve']); // موافقة على طلب حجز
     Route::post('/rental-bookings/{id}/reject', [RentalBookingController::class, 'reject']); // رفض طلب حجز
+    Route::post('/rental-bookings/{id}/mark-delivered', [RentalBookingController::class, 'markDelivered']); // ⬅️ جديد: تأكيد تسليم السيارة
+    Route::post('/rental-bookings/{id}/mark-returned', [RentalBookingController::class, 'markReturned']); // ⬅️ جديد: تأكيد إرجاع السيارة
     Route::delete('/rental-bookings/{id}', [RentalBookingController::class, 'cancel']); // إلغاء حجز
+
+    // ⬅️ جديد: نظام المفضلة (Favorites) الحقيقي، بدل أزرار القلب الشكلية المحلية
+    Route::get('/favorites', [FavoriteController::class, 'index']); // قائمة مفضلتي
+    Route::post('/favorites', [FavoriteController::class, 'store']); // إضافة سيارة للمفضلة
+    Route::delete('/favorites/{carId}', [FavoriteController::class, 'destroy']); // إزالة سيارة من المفضلة
+    Route::get('/favorites/{carId}/status', [FavoriteController::class, 'status']); // هل هذه السيارة مفضّلة؟
+
+    // ⬅️ جديد: البحث عن مستخدم (لميزات مثل "قيّم المشتري" بالبيع العادي)
+    Route::get('/users/search', [UserSearchController::class, 'search']);
+
+    // ⬅️ جديد: تعليم إعلان بيع كـ "مباع" ذاتياً من قبل البائع (دون انتظار الأدمن)
+    Route::post('/my-ads/{id}/mark-sold', [AdController::class, 'markSold']);
+
+    // ⬅️ جديد: رسائل حقيقية داخل التطبيق بين مستخدمين، بدل الاعتماد الكامل
+    // على واتساب خارجي (جدول messages كان موجوداً بدون أي استخدام فعلي)
+    Route::get('/messages/conversations', [MessageController::class, 'conversations']);
+    Route::get('/messages/unread-count', [MessageController::class, 'unreadCount']);
+    Route::get('/messages/with/{userId}', [MessageController::class, 'thread'])->whereNumber('userId');
+    Route::post('/messages', [MessageController::class, 'send'])
+        ->middleware('throttle:30,1'); // منع سبام الرسائل
+
+    // ⬅️ جديد: حظر مستخدم (يمنع الرسائل الجديدة بالاتجاهين)
+    Route::get('/blocks', [BlockController::class, 'index']);
+    Route::post('/blocks', [BlockController::class, 'store']);
+    Route::delete('/blocks/{blockedUserId}', [BlockController::class, 'destroy']);
+
+    // ⬅️ جديد: الإبلاغ عن مستخدم (احتيال/إساءة/محتوى غير لائق/سبام)
+    Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('/reports/my', [ReportController::class, 'myReports']);
+
+    // ⬅️ جديد: نزاع مرتبط بمعاملة فعلية (تصعيد للأدمن)
+    Route::post('/disputes', [DisputeController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('/disputes/my', [DisputeController::class, 'myDisputes']);
 
 
     // مسارات إدارة المزادات
@@ -123,7 +170,10 @@ Route::get('/rental-ads/{id}', [RentalAdController::class, 'show']); // عرض �
     Route::post('/auctions', [AuctionController::class, 'store']);
 
     Route::get('/auctions/{id}', [AuctionController::class, 'show'])->whereNumber('id');
-    Route::post('/auctions/{id}/bid', [AuctionController::class, 'placeBid'])->whereNumber('id');
+    // ⬅️ جديد: rate limiting صريح وموثّق لعمليات المزايدة تحديداً (منع سبام المزايدات)
+    Route::post('/auctions/{id}/bid', [AuctionController::class, 'placeBid'])
+        ->whereNumber('id')
+        ->middleware('throttle:10,1'); // 10 مزايدات كحد أقصى لكل مستخدم بالدقيقة
     Route::post('/auctions/{id}/accept-final-price', [AuctionController::class, 'acceptFinalPrice'])->whereNumber('id');
     Route::post('/auctions/{id}/reject-final-price', [AuctionController::class, 'rejectFinalPrice'])->whereNumber('id');
     Route::post('/auctions/{id}/complete-sale', [AuctionController::class, 'completeSale'])->whereNumber('id');
@@ -153,6 +203,8 @@ Route::get('/rental-ads/{id}', [RentalAdController::class, 'show']); // عرض �
     // Ratings API
     Route::get('/users/{user}/ratings', [RatingController::class, 'index']);
     Route::post('/users/{user}/ratings', [RatingController::class, 'store']);
+    // ⬅️ جديد: المعاملات المكتملة التي يحق لي تقييمها الآن ولم أقيّمها بعد
+    Route::get('/ratings/ratable', [RatingController::class, 'ratable']);
 
     // Notifications API
     Route::get('/notifications', [NotificationController::class, 'index']);
@@ -244,6 +296,13 @@ Route::post('/ads/{id}/reject', [AdminAdController::class, 'rejectAd']);
     Route::get('/auctions/{id}', [AdminAuctionController::class, 'showAuction'])->whereNumber('id'); // تفاصيل مزاد
     Route::post('/auctions/{id}/approve', [AdminAuctionController::class, 'approveAuction'])->whereNumber('id'); // الموافقة على مزاد
     Route::post('/auctions/{id}/reject', [AdminAuctionController::class, 'rejectAuction'])->whereNumber('id'); // رفض مزاد
+
+    // ⬅️ جديد: مراجعة البلاغات والنزاعات (لا واجهة Flutter مخصصة بعد؛
+    // جاهز للاستهلاك من أي لوحة أدمن، بما فيها لوحة الويب المذكورة أعلاه)
+    Route::get('/reports', [AdminModerationController::class, 'reports']);
+    Route::post('/reports/{id}/status', [AdminModerationController::class, 'updateReport'])->whereNumber('id');
+    Route::get('/disputes', [AdminModerationController::class, 'disputes']);
+    Route::post('/disputes/{id}/status', [AdminModerationController::class, 'updateDispute'])->whereNumber('id');
 });
 
 
@@ -314,3 +373,107 @@ Route::post('password/otp-reset', [OtpPasswordResetController::class, 'resetPass
 
 // اسم بديل مألوف لنفس مسار تعيين كلمة المرور الجديدة (نفس الدالة تماماً)
 Route::post('reset-password', [OtpPasswordResetController::class, 'resetPassword'])->name('password.update');
+
+// ============================================================
+// ⬅️ جديد: طبقة Api\Admin الجديدة التي تستهلكها لوحة React
+// (wasetak-cars-web). تتّبع نفس الاتفاقية الموثّقة بـ ADMIN_API_NOTES.md
+// (غلاف موحّد {success,data,message}، pagination بشكل
+// data.items + data.pagination، per_page=20، middleware auth:sanctum +
+// admin.api). مسارات جديدة بالكامل، لا تعديل على أي سطر أعلاه.
+// ملاحظة مهمة: هذه الوحدة تغطي فقط Reports وDisputes (الميزات التي
+// أضيفت هذا العام) — بقية الوحدات الموثّقة بنفس الملف (Dashboard, Users,
+// Ads, RentalAds, Auctions, Promotions, Transactions, Ratings,
+// CarsApproval, Wallet) موصوفة كمكتملة فعلاً في الملف لكن غير موجودة في
+// نسخة الباك-إند هذه — يُفترض أنها موجودة بنسخة أخرى من المستودع.
+// ============================================================
+use App\Http\Controllers\Api\Admin\ReportController as ApiAdminReportController;
+use App\Http\Controllers\Api\Admin\DisputeController as ApiAdminDisputeController;
+use App\Http\Controllers\Api\Admin\DashboardController as ApiAdminDashboardController;
+use App\Http\Controllers\Api\Admin\UserController as ApiAdminUserController;
+use App\Http\Controllers\Api\Admin\AdController as ApiAdminAdController;
+use App\Http\Controllers\Api\Admin\RentalAdController as ApiAdminRentalAdController;
+use App\Http\Controllers\Api\Admin\AuctionController as ApiAdminAuctionController;
+use App\Http\Controllers\Api\Admin\PromotionController as ApiAdminPromotionController;
+use App\Http\Controllers\Api\Admin\TransactionController as ApiAdminTransactionController;
+use App\Http\Controllers\Api\Admin\RatingController as ApiAdminRatingController;
+use App\Http\Controllers\Api\Admin\CarController as ApiAdminCarController;
+use App\Http\Controllers\Api\Admin\WalletAdminController as ApiAdminWalletAdminController;
+use App\Http\Controllers\Api\Admin\AuditLogController as ApiAdminAuditLogController;
+use App\Http\Controllers\Api\Admin\BlockController as ApiAdminBlockController;
+
+Route::middleware(['auth:sanctum', 'admin.api'])->prefix('admin')->group(function () {
+    Route::get('/reports', [ApiAdminReportController::class, 'index']);
+    Route::get('/reports/{id}', [ApiAdminReportController::class, 'show'])->whereNumber('id');
+    Route::put('/reports/{id}', [ApiAdminReportController::class, 'update'])->whereNumber('id');
+    Route::delete('/reports/{id}', [ApiAdminReportController::class, 'destroy'])->whereNumber('id');
+
+    Route::get('/disputes', [ApiAdminDisputeController::class, 'index']);
+    Route::get('/disputes/{id}', [ApiAdminDisputeController::class, 'show'])->whereNumber('id');
+    Route::put('/disputes/{id}', [ApiAdminDisputeController::class, 'update'])->whereNumber('id');
+    Route::delete('/disputes/{id}', [ApiAdminDisputeController::class, 'destroy'])->whereNumber('id');
+
+    // ⬅️ جديد: بقية وحدات Admin API الموثّقة بـ ADMIN_API_NOTES.md، أُعيد
+    // بناؤها اعتماداً على الكود الفعلي بـ app/Http/Controllers/Admin/*
+    // القديم (Blade/JSON قديم) بعد أن تبيّن عدم وجودها بهذه النسخة أصلاً.
+
+    Route::get('/dashboard', [ApiAdminDashboardController::class, 'index']);
+
+    Route::get('/account-types', [ApiAdminUserController::class, 'accountTypes']);
+    Route::get('/users', [ApiAdminUserController::class, 'index']);
+    Route::get('/users/{user}', [ApiAdminUserController::class, 'show']);
+    Route::put('/users/{user}', [ApiAdminUserController::class, 'update']);
+    Route::delete('/users/{user}', [ApiAdminUserController::class, 'destroy']);
+
+    Route::get('/ads', [ApiAdminAdController::class, 'index']);
+    Route::put('/ads/{ad}', [ApiAdminAdController::class, 'update']);
+    Route::delete('/ads/{ad}', [ApiAdminAdController::class, 'destroy']);
+
+    Route::get('/rental-ads', [ApiAdminRentalAdController::class, 'index']);
+    Route::put('/rental-ads/{rentalAd}', [ApiAdminRentalAdController::class, 'update']);
+    Route::delete('/rental-ads/{rentalAd}', [ApiAdminRentalAdController::class, 'destroy']);
+
+    Route::get('/auctions', [ApiAdminAuctionController::class, 'index']);
+    Route::get('/auctions/{auction}', [ApiAdminAuctionController::class, 'show']);
+    Route::put('/auctions/{auction}', [ApiAdminAuctionController::class, 'update']);
+    Route::delete('/auctions/{auction}', [ApiAdminAuctionController::class, 'destroy']);
+
+    Route::get('/promotions', [ApiAdminPromotionController::class, 'index']);
+    Route::get('/promotions/{promotion}', [ApiAdminPromotionController::class, 'show']);
+    Route::put('/promotions/{promotion}', [ApiAdminPromotionController::class, 'update']);
+    Route::delete('/promotions/{promotion}', [ApiAdminPromotionController::class, 'destroy']);
+
+    Route::get('/transactions', [ApiAdminTransactionController::class, 'index']);
+    Route::get('/transactions/{transaction}', [ApiAdminTransactionController::class, 'show']);
+
+    Route::get('/ratings', [ApiAdminRatingController::class, 'index']);
+    Route::get('/ratings/{rating}', [ApiAdminRatingController::class, 'show']);
+    Route::put('/ratings/{rating}', [ApiAdminRatingController::class, 'update']);
+    Route::delete('/ratings/{rating}', [ApiAdminRatingController::class, 'destroy']);
+
+    // ⚠️ بادئة car-approvals (بدل cars) لتفادي أي تعارض مع الكتلة القديمة admin/cars/*
+    Route::get('/car-approvals/rejection-reasons', [ApiAdminCarController::class, 'rejectionReasons']);
+    Route::get('/car-approvals/bulk-batches/pending', [ApiAdminCarController::class, 'pendingBulkBatches']);
+    Route::get('/car-approvals/bulk-batches/{batchId}', [ApiAdminCarController::class, 'showBulkBatch']);
+    Route::post('/car-approvals/bulk-batches/{batchId}/approve', [ApiAdminCarController::class, 'approveBulkBatch']);
+    Route::post('/car-approvals/bulk-batches/{batchId}/reject', [ApiAdminCarController::class, 'rejectBulkBatch']);
+    Route::get('/car-approvals/pending', [ApiAdminCarController::class, 'pending']);
+    Route::get('/car-approvals/approved', [ApiAdminCarController::class, 'approved']);
+    Route::get('/car-approvals/rejected', [ApiAdminCarController::class, 'rejected']);
+    Route::get('/car-approvals/{id}', [ApiAdminCarController::class, 'show'])->whereNumber('id');
+    Route::post('/car-approvals/{id}/approve', [ApiAdminCarController::class, 'approve'])->whereNumber('id');
+    Route::post('/car-approvals/{id}/reject', [ApiAdminCarController::class, 'reject'])->whereNumber('id');
+    Route::post('/car-approvals/{id}/approve-inspection', [ApiAdminCarController::class, 'approveInspection'])->whereNumber('id');
+
+    Route::get('/wallet/withdrawals', [ApiAdminWalletAdminController::class, 'pendingWithdrawals']);
+    Route::post('/wallet/withdrawals/{id}/approve', [ApiAdminWalletAdminController::class, 'approve'])->whereNumber('id');
+    Route::post('/wallet/withdrawals/{id}/reject', [ApiAdminWalletAdminController::class, 'reject'])->whereNumber('id');
+    Route::get('/wallet/frozen', [ApiAdminWalletAdminController::class, 'frozenWallets']);
+    Route::post('/wallet/{user}/unfreeze', [ApiAdminWalletAdminController::class, 'unfreeze']);
+
+    // ⬅️ جديد: سجل تدقيق إجراءات الأدمن (read-only)
+    Route::get('/audit-logs', [ApiAdminAuditLogController::class, 'index']);
+
+    // ⬅️ جديد: إدارة الحظر بين المستخدمين (كانت فجوة — لا واجهة أدمن لها)
+    Route::get('/blocks', [ApiAdminBlockController::class, 'index']);
+    Route::delete('/blocks/{block}', [ApiAdminBlockController::class, 'destroy']);
+});

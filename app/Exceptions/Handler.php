@@ -26,7 +26,13 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            //
+            // ⬅️ جديد: مراقبة أخطاء حقيقية عبر Sentry، بدل الاعتماد فقط
+            // على report($e) بملفات storage/logs (يحتاج فتح السيرفر يدوياً
+            // لرؤيتها). مُعطّل بأمان تماماً إن كان SENTRY_LARAVEL_DSN فارغاً
+            // بالـ .env — لا يغيّر أي سلوك حالي.
+            if (app()->bound('sentry') && config('sentry.dsn')) {
+                app('sentry')->captureException($e);
+            }
         });
 
         /*

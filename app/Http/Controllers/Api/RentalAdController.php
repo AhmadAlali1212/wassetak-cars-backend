@@ -77,6 +77,18 @@ class RentalAdController extends Controller
             ->where('published_at', '<=', now())
             ->whereHas('car', function ($q) {
                 $q->where('approval_status', 'approved');
+            })
+            // ⬅️ جديد: إخفاء السيارات المؤجَّرة فعلياً الآن (حجز مؤكد يغطي
+            // تاريخ اليوم) أو المحجوبة يدوياً من المالك اليوم، من قائمة
+            // التصفح العامة — كانت تظهر كمتاحة رغم عدم توفرها فعلياً.
+            ->whereDoesntHave('bookings', function ($q) {
+                $q->where('status', 'confirmed')
+                    ->where('start_date', '<=', now()->toDateString())
+                    ->where('end_date', '>=', now()->toDateString());
+            })
+            ->whereDoesntHave('unavailabilities', function ($q) {
+                $q->where('start_date', '<=', now()->toDateString())
+                    ->where('end_date', '>=', now()->toDateString());
             });
 
         /*
@@ -637,5 +649,120 @@ class RentalAdController extends Controller
         $rentalAd->delete();
 
         return response()->json(['message' => 'تم حذف إعلان التأجير بنجاح.'], 200);
+    }
+
+    /**
+     * عرض التوفر الفعلي لإعلان تأجير: الأيام المحجوزة فعلياً (حجوزات
+     * مؤكدة) + الأيام التي حجبها المالك يدوياً (صيانة، إلخ). هذا الـ
+     * endpoint عام (متاح لأي مستخدم مسجّل) ليستخدمه الفرونت عند رسم
+     * تقويم الحجز ومنع اختيار أيام غير متاحة.
+     *
+     * @param  int  $id
+     */
+    public function availability(Request $request, $id)
+    {
+        $rentalAd = RentalAd::query()->whereKey($id)->first();
+
+        if (!$rentalAd) {
+            return response()->json(['message' => 'إعلان التأجير غير موجود.'], 404);
+        }
+
+        $bookedRanges = $rentalAd->bookings()
+            ->where('status', 'confirmed')
+            ->where('end_date', '>=', now()->toDateString())
+            ->get(['id', 'start_date', 'end_date'])
+            ->map(fn ($b) => [
+                'start_date' => $b->start_date->toDateString(),
+                'end_date' => $b->end_date->toDateString(),
+                'source' => 'booking',
+            ]);
+
+        $unavailableRanges = $rentalAd->unavailabilities()
+            ->where('end_date', '>=', now()->toDateString())
+            ->get(['id', 'start_date', 'end_date', 'reason'])
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'start_date' => $u->start_date->toDateString(),
+                'end_date' => $u->end_date->toDateString(),
+                'reason' => $u->reason,
+                'source' => 'owner_blocked',
+            ]);
+
+        return response()->json([
+            'message' => 'تم جلب بيانات التوفر بنجاح.',
+            'rental_ad_id' => $rentalAd->id,
+            'unavailable_ranges' => $bookedRanges->concat($unavailableRanges)->values(),
+        ]);
+    }
+
+    /**
+     * إضافة فترة عدم توفر يدوية من قبل مالك إعلان التأجير (مثلاً:
+     * السيارة عند الصيانة، أو محجوزة خارج التطبيق لأيام معينة).
+     */
+    public function addUnavailableDates(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = $request->user();
+
+        $rentalAd = RentalAd::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$rentalAd) {
+            return response()->json(['message' => 'إعلان التأجير غير موجود أو لا يخصك.'], 404);
+        }
+
+        $hasBookedOverlap = $rentalAd->bookings()
+            ->where('status', 'confirmed')
+            ->where('start_date', '<=', $request->end_date)
+            ->where('end_date', '>=', $request->start_date)
+            ->exists();
+
+        if ($hasBookedOverlap) {
+            return response()->json([
+                'message' => 'لا يمكن حجب هذه الفترة، يوجد حجز مؤكد ضمنها بالفعل.',
+            ], 422);
+        }
+
+        $unavailability = $rentalAd->unavailabilities()->create([
+            'created_by' => $user->id,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'reason' => $request->input('reason'),
+        ]);
+
+        return response()->json([
+            'message' => '✅ تم حجب هذه الفترة بنجاح، ولن تظهر متاحة للحجز.',
+            'unavailability' => $unavailability,
+        ], 201);
+    }
+
+    /**
+     * حذف فترة عدم توفر يدوية أضافها المالك (لإعادة فتح الأيام للحجز).
+     */
+    public function removeUnavailableDates(Request $request, $id, $unavailabilityId)
+    {
+        $user = $request->user();
+
+        $rentalAd = RentalAd::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$rentalAd) {
+            return response()->json(['message' => 'إعلان التأجير غير موجود أو لا يخصك.'], 404);
+        }
+
+        $deleted = $rentalAd->unavailabilities()->whereKey($unavailabilityId)->delete();
+
+        if (!$deleted) {
+            return response()->json(['message' => 'فترة عدم التوفر غير موجودة.'], 404);
+        }
+
+        return response()->json(['message' => '✅ تمت إزالة الحجب عن هذه الفترة.']);
     }
 }

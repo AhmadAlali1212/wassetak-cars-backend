@@ -17,13 +17,19 @@ class RentalBooking extends Model
         // فترة الحجز الفعلية
         'start_date',
         'end_date',
-        // حالة الحجز: confirmed, completed, cancelled
+        // حالة الحجز: pending, confirmed, completed, cancelled, rejected
         'status',
+        // تتبع التسليم والإرجاع الفعلي (بدل الحل المحلي المؤقت بالفرونت)
+        'delivered_at',
+        'returned_at',
+        'rejection_reason',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'delivered_at' => 'datetime',
+        'returned_at' => 'datetime',
     ];
 
     // علاقة مع إعلان الإيجار (الغلاف الثابت)

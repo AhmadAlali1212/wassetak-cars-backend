@@ -112,6 +112,54 @@ class Kernel extends ConsoleKernel
                 return;
             }
 
+            // ⬅️ جديد: إشعار "اقترب انتهاء مزاد أنت مشارك فيه" — لصاحب المزاد
+            // ولكل من زايد عليه بمزايدة لها عربون محجوز فعلياً، مرة واحدة فقط
+            // لكل مزاد (خلال آخر 15 دقيقة قبل الإغلاق).
+            Auction::query()
+                ->where('status', 'active')
+                ->whereNull('ending_soon_notified_at')
+                ->where('end_time', '>', now())
+                ->where('end_time', '<=', now()->addMinutes(15))
+                ->with(['bids' => function ($q) {
+                    $q->where('is_deposit_held', true);
+                }])
+                ->select('id', 'user_id', 'end_time')
+                ->chunkById(50, function ($auctions) {
+                    foreach ($auctions as $auction) {
+                        DB::transaction(function () use ($auction) {
+                            $locked = Auction::query()
+                                ->whereKey($auction->id)
+                                ->whereNull('ending_soon_notified_at')
+                                ->lockForUpdate()
+                                ->first();
+
+                            if (!$locked) {
+                                return;
+                            }
+
+                            $participantIds = $auction->bids
+                                ->pluck('user_id')
+                                ->push($auction->user_id)
+                                ->unique();
+
+                            foreach ($participantIds as $userId) {
+                                $isOwner = (int) $userId === (int) $auction->user_id;
+                                NotificationService::send(
+                                    $userId,
+                                    'اقترب انتهاء المزاد',
+                                    $isOwner
+                                        ? 'سينتهي مزادك خلال دقائق قليلة.'
+                                        : 'سينتهي المزاد الذي تشارك فيه خلال دقائق قليلة.',
+                                    'auction_ending_soon',
+                                    ['auction_id' => $auction->id]
+                                );
+                            }
+
+                            $locked->update(['ending_soon_notified_at' => now()]);
+                        });
+                    }
+                });
+
             // لا يجوز إبقاء عربون الفائز محجوزاً بلا نهاية إذا لم تُستكمل الصفقة.
             Auction::query()
                 ->where('final_price_status', 'accepted')

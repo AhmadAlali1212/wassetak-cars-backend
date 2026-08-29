@@ -48,8 +48,35 @@ class RentalAd extends Model
         return $this->hasMany(RentalBooking::class);
     }
 
+    // علاقة مع فترات عدم التوفر اليدوية التي حددها المالك (صيانة، إلخ)
+    public function unavailabilities()
+    {
+        return $this->hasMany(RentalUnavailability::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    /**
+     * هل الفترة (start, end) متاحة فعلياً؟ (لا تتقاطع مع حجز مؤكد
+     * ولا مع فترة عدم توفر حددها المالك يدوياً)
+     */
+    public function isRangeAvailable($start, $end): bool
+    {
+        $bookedOverlap = $this->bookings()
+            ->where('status', 'confirmed')
+            ->where('start_date', '<', $end)
+            ->where('end_date', '>', $start)
+            ->exists();
+
+        if ($bookedOverlap) {
+            return false;
+        }
+
+        return !$this->unavailabilities()
+            ->overlapping($start, $end)
+            ->exists();
     }
 }

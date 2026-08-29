@@ -413,6 +413,73 @@ class AdController extends Controller
     }
 
     /**
+     * تعليم الإعلان "مباع" ذاتياً من قبل البائع نفسه، دون انتظار الأدمن.
+     * يسمح بربط المشتري الفعلي (buyer_id) إن كان مستخدماً مسجلاً بالتطبيق،
+     * ليصبح بالإمكان لاحقاً بناء تقييم موثوق مرتبط بمعاملة بيع حقيقية.
+     */
+    public function markSold(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'buyer_id' => 'nullable|integer|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = $request->user();
+
+        if ($request->filled('buyer_id') && (int) $request->buyer_id === (int) $user->id) {
+            return response()->json([
+                'message' => 'لا يمكن تعيين نفسك كمشتري لسيارتك.',
+            ], 422);
+        }
+
+        $ad = Ad::query()
+            ->whereKey($id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$ad) {
+            return response()->json(['message' => 'الإعلان غير موجود أو لا يخصك.'], 404);
+        }
+
+        if ($ad->status === 'sold') {
+            return response()->json(['message' => 'الإعلان مباع بالفعل.'], 422);
+        }
+
+        if (!in_array($ad->status, ['active', 'expired'], true)) {
+            return response()->json([
+                'message' => 'لا يمكن تعليم إعلان بهذه الحالة كـ "مباع".',
+            ], 422);
+        }
+
+        $ad->update([
+            'status' => 'sold',
+            'buyer_id' => $request->input('buyer_id'),
+            'sold_at' => now(),
+        ]);
+
+        // ⬅️ جديد: إشعار المشتري (إن كان محدداً) بأن بإمكانه الآن تقييم
+        // هذه الصفقة — يدفعه فعلياً نحو شاشة "تقييمات معلّقة" بدل انتظاره
+        // يكتشف ذلك بنفسه.
+        if ($request->filled('buyer_id')) {
+            \App\Services\NotificationService::send(
+                (int) $request->input('buyer_id'),
+                'يمكنك الآن تقييم هذه الصفقة',
+                "أكمل البائع صفقة بيع \"{$ad->car->make} {$ad->car->model}\" معك. شاركنا رأيك بتقييم سريع.",
+                'ratable_transaction',
+                ['type' => 'ad', 'transaction_id' => $ad->id]
+            );
+        }
+
+        return response()->json([
+            'message' => '✅ تم تعليم الإعلان كـ "مباع" بنجاح.',
+            'ad' => $ad->fresh(['car', 'buyer']),
+        ]);
+    }
+
+    /**
      * نشر إعلان بيع (السماح بنشره عدة مرات)
      * الشروط:
      * 1. حالة الإعلان يجب أن تكون active (موافقة من الأدمن)

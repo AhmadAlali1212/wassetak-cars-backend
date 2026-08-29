@@ -177,18 +177,56 @@ class AuctionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $auction = Auction::with('car.user', 'winner', 'bids.user')->find($id);
 
+        if (!$auction) {
+            return response()->json(['message' => 'المزاد غير موجود.'], 404);
+        }
+
+        // إصلاح: إذا انتهى الوقت لكن الحالة ما زالت "active" (لم يمرّ عليها
+        // الـ cron بعد)، نغلقه فوراً هنا بدل ترك المستخدم يشوف مزاداً "منتهي
+        // لكن ما زال يبدو نشطاً". هذا يجعل الإغلاق موثوقاً حتى لو تأخرت
+        // دورة الجدولة.
         if (
-            !$auction
-            || $auction->status !== 'active'
-            || !$auction->car
-            || $auction->car->approval_status !== 'approved'
-            || now()->lessThan($auction->start_time)
-            || now()->greaterThanOrEqualTo($auction->end_time)
+            $auction->status === 'active'
+            && $auction->end_time
+            && now()->greaterThanOrEqualTo($auction->end_time)
         ) {
+            try {
+                $auction = \App\Services\AuctionClosingService::closeExpiredAuction($auction)
+                    ->load('car.user', 'winner', 'bids.user');
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        $isWithinActiveWindow = $auction->status === 'active'
+            && $auction->car
+            && $auction->car->approval_status === 'approved'
+            && now()->greaterThanOrEqualTo($auction->start_time)
+            && now()->lessThan($auction->end_time);
+
+        if ($isWithinActiveWindow) {
+            return response()->json([
+                'message' => 'تم جلب تفاصيل المزاد بنجاح.',
+                'auction' => $auction,
+            ]);
+        }
+
+        // المزاد ليس "active" ضمن نافذته الزمنية الحالية (منتهي/مغلق/ملغى/
+        // بانتظار الموافقة). كان هذا سابقاً يُرجع 404 دائماً، مما يكسر شاشة
+        // التفاصيل لأي مزاد منتهي. الآن: نسمح بالوصول لصاحب المزاد، الفائز،
+        // أو أي مستخدم شارك بمزايدة عليه — أما بقية الزوار العامين فتبقى محجوبة.
+        $user = $request->user();
+        $isParticipant = $user && (
+            (int) $auction->user_id === (int) $user->id
+            || (int) $auction->winner_id === (int) $user->id
+            || $auction->bids->contains('user_id', $user->id)
+        );
+
+        if (!$isParticipant) {
             return response()->json(['message' => 'المزاد غير موجود أو غير نشط حالياً.'], 404);
         }
 
@@ -309,6 +347,15 @@ class AuctionController extends Controller
         }
 
         try {
+            // نحدد "أعلى مزايد سابق" قبل تنفيذ المزايدة الجديدة، لنرسل له إشعار
+            // "تم تجاوز مزايدتك" بعدها — كان هذا الإشعار مفقوداً بالكامل سابقاً.
+            $previousTopBid = \App\Models\Bid::where('auction_id', $id)
+                ->where('is_deposit_held', true)
+                ->where('user_id', '!=', $request->user()->id)
+                ->orderByDesc('amount')
+                ->orderByDesc('id')
+                ->first();
+
             $bid = AuctionDepositService::placeBid(
                 (int) $id,
                 $request->user(),
@@ -330,6 +377,21 @@ class AuctionController extends Controller
                     'deposit_amount' => (float) $bid->deposit_amount,
                 ]
             );
+
+            // ⬅️ جديد: إشعار المزايد السابق بأن مزايدته تم تجاوزها
+            if ($previousTopBid && (int) $previousTopBid->user_id !== (int) $bid->user_id) {
+                NotificationService::send(
+                    $previousTopBid->user_id,
+                    'تم تجاوز مزايدتك',
+                    'قام مستخدم آخر بتقديم مزايدة أعلى من مزايدتك بقيمة '
+                        . number_format((float) $bid->amount, 2) . '. عربونك السابق تم تحريره تلقائياً.',
+                    'bid_outbid',
+                    [
+                        'auction_id' => $auction->id,
+                        'new_amount' => (float) $bid->amount,
+                    ]
+                );
+            }
 
             return response()->json([
                 'message' => 'تمت المزايدة وحجز العربون بنجاح.',
@@ -657,6 +719,18 @@ class AuctionController extends Controller
                 'auction_sale_completed',
                 ['auction_id' => $auction->id]
             );
+
+            // ⬅️ جديد: الآن أصبحت هذه الصفقة قابلة للتقييم فعلياً — ندفع
+            // الطرفين نحو شاشة "تقييمات معلّقة" بدل تركهم يكتشفون ذلك بأنفسهم.
+            foreach ([$auction->user_id, $auction->winner_id] as $userId) {
+                NotificationService::send(
+                    $userId,
+                    'يمكنك الآن تقييم هذه الصفقة',
+                    "اكتملت صفقة المزاد على \"{$auction->car->make} {$auction->car->model}\". شاركنا رأيك بتقييم سريع.",
+                    'ratable_transaction',
+                    ['type' => 'auction', 'transaction_id' => $auction->id]
+                );
+            }
 
             return response()->json([
                 'message' => 'تم تأكيد الصفقة وتحرير عربون الفائز.',

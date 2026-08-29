@@ -11,12 +11,14 @@ class Ad extends Model
     protected $fillable = [
         'car_id',
         'user_id',
+        'buyer_id',
         'price',
         'status', // 'draft', 'pending', 'active', 'expired', 'rejected', 'sold'
         'rejection_reason',
         'published_at',
         'expires_at',
         'expiration_reminder_sent_at',
+        'sold_at',
     ];
 
     protected $casts = [
@@ -24,6 +26,7 @@ class Ad extends Model
         'expires_at' => 'datetime',
         'expiration_reminder_sent_at' => 'datetime',
         'approved_at' => 'datetime',
+        'sold_at' => 'datetime',
     ];
 
     // علاقة مع السيارة
@@ -36,6 +39,12 @@ class Ad extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // علاقة مع المشتري الفعلي (إن تم تعيينه عند البيع)
+    public function buyer()
+    {
+        return $this->belongsTo(User::class, 'buyer_id');
     }
 
     // علاقة متعددة الأشكال مع المعاملات (Polymorphic relationship with Transactions)

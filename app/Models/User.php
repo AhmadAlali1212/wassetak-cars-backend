@@ -199,4 +199,16 @@ class User extends Authenticatable
             'follower_id'
         )->withTimestamps();
     }
+
+    // علاقة مع سجلات المفضلة الخاصة بالمستخدم
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    // علاقة مع السيارات المفضّلة (مباشرة عبر جدول favorites)
+    public function favoriteCars()
+    {
+        return $this->belongsToMany(Car::class, 'favorites')->withTimestamps();
+    }
 }

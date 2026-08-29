@@ -89,6 +89,18 @@ class Car extends Model
         return $this->hasMany(RentalAd::class);
     }
 
+    /** سجلات المفضلة (من أضاف هذه السيارة لمفضلته). */
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /** المستخدمون الذين أضافوا هذه السيارة لمفضلتهم. */
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
+    }
+
     /** آخر إعلان تأجير للسيارة، بما في ذلك الحالات الداخلية للمالك. */
     public function latestRentalAd()
     {
