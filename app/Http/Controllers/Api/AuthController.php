@@ -11,8 +11,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\AccountType; // لاستخدام نموذج أنواع الحسابات
 
 class AuthController extends Controller
@@ -78,6 +80,10 @@ class AuthController extends Controller
     private function generateAndSendVerificationOtp(User $user): void
     {
         $otp = rand(100000, 999999);
+        Log::info('Registration OTP generated', [
+            'email' => $user->email,
+            'otp' => $otp,
+        ]);
 
         DB::table('email_verification_otps')->updateOrInsert(
             ['email' => $user->email],
@@ -246,7 +252,11 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $accessToken = $request->user()->currentAccessToken();
+
+        if ($accessToken instanceof PersonalAccessToken) {
+            $accessToken->delete();
+        }
 
         return response()->json([
             'message' => 'تم تسجيل الخروج بنجاح.',

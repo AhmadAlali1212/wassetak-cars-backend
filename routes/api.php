@@ -83,6 +83,9 @@ Route::post('/cars', [CarController::class, 'store']); // إضافة سيارة 
 Route::get('/cars/{id}', [CarController::class, 'showFull']); // عرض تفاصيل سيارة كاملة (السيارة + إعلان البيع + إعلان التأجير وحجوزاته + عروض المالك)
 Route::put('/cars/{id}', [CarController::class, 'update']); // تعديل سيارة
 Route::delete('/cars/{id}', [CarController::class, 'destroy']); // حذف سيارة
+// ⬅️ جديد: رفع فيديو للسيارة لاحقاً (بعد الإنشاء) بدون تعديل بقية بيانات السيارة
+Route::post('/cars/{id}/videos', [CarController::class, 'addVideos']);
+Route::delete('/cars/{id}/videos', [CarController::class, 'removeVideo']);
 Route::get('/my-cars', [CarController::class, 'myCars']);
 Route::get('/my-cars/{id}', [CarController::class, 'showMineFull']);
 Route::get('/cars', [CarController::class, 'publicCars']);

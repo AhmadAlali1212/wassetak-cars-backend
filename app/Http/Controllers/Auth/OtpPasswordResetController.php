@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class OtpPasswordResetController extends Controller
 {
@@ -52,8 +53,8 @@ public function sendOtp(Request $request)
     // --------------------------------------------------------
     $user = User::where('email', $email)->first();
     $otp = rand(100000, 999999);
-
-    DB::table('password_reset_tokens')->updateOrInsert(
+        Log::info('OTP generated', ['email' => $email, 'otp' => $otp]);
+      DB::table('password_reset_tokens')->updateOrInsert(
         ['email' => $email],
         [
             'token' => Hash::make($otp),
@@ -84,6 +85,7 @@ public function sendOtp(Request $request)
      */
     public function verifyOtp(Request $request)
     {
+        
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'otp'   => 'required|numeric|digits:6',

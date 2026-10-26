@@ -206,6 +206,10 @@ class CarController extends Controller
             'longitude' => 'required|numeric|between:-180,180',
             'images' => 'nullable|array|max:5',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            // ⬅️ جديد: فيديوهات اختيارية عند إنشاء السيارة — يمكن أيضاً
+            // إضافتها لاحقاً بأي وقت عبر POST /cars/{id}/videos
+            'videos' => 'nullable|array|max:2',
+            'videos.*' => 'file|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-matroska|max:20480',
         ]);
 
         if ($validator->fails()) {
@@ -264,6 +268,17 @@ class CarController extends Controller
             }
         }
         $car->images = $imagePaths;
+
+        // ⬅️ جديد: معالجة تحميل الفيديوهات الاختيارية (إن وُجدت عند الإنشاء)
+        $videoPaths = [];
+        if ($request->hasFile('videos')) {
+            foreach ($request->file('videos') as $video) {
+                $path = $video->store('public/cars_videos');
+                $videoPaths[] = Storage::url($path);
+            }
+        }
+        $car->videos = $videoPaths;
+
         $car->save();
 
         return response()->json([
@@ -459,6 +474,13 @@ class CarController extends Controller
         if ($car->images) {
             foreach ($car->images as $imagePath) {
                 Storage::delete(str_replace('/storage/', 'public/', $imagePath));
+            }
+        }
+
+        // ⬅️ جديد: حذف الفيديوهات المرتبطة بالسيارة أيضاً
+        if ($car->videos) {
+            foreach ($car->videos as $videoPath) {
+                Storage::delete(str_replace('/storage/', 'public/', $videoPath));
             }
         }
 
@@ -1007,4 +1029,94 @@ public function requestInspection(Request $request, $id)
         'transaction' => $transaction,
     ]);
 }
+
+    // ==================== فيديوهات السيارة (اختيارية، عند الإنشاء أو لاحقاً) ====================
+
+    /**
+     * ⬅️ جديد: إضافة فيديو أو أكثر لسيارة موجودة مسبقاً — يغطي حالة
+     * "أريد رفعه لاحقاً" بدون الحاجة لإرسال بقية بيانات السيارة مجدداً.
+     * يُضيف للفيديوهات الحالية (لا يستبدلها)، بحد أقصى إجمالي 2 فيديو
+     * لكل سيارة.
+     */
+    public function addVideos(Request $request, $id)
+    {
+        $user = $request->user();
+        $car = Car::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$car) {
+            return response()->json(['message' => 'السيارة غير موجودة أو ليس لديك صلاحية لتعديلها.'], 404);
+        }
+
+        $existingVideos = $car->videos ?? [];
+
+        $validator = Validator::make($request->all(), [
+            'videos' => 'required|array|min:1|max:2',
+            'videos.*' => 'file|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-matroska|max:20480',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        if (count($existingVideos) + count($request->file('videos')) > 2) {
+            return response()->json([
+                'message' => 'لا يمكن أن يتجاوز عدد فيديوهات السيارة الواحدة فيديوهين اثنين. احذف فيديو موجود أولاً.',
+            ], 422);
+        }
+
+        $newPaths = [];
+        foreach ($request->file('videos') as $video) {
+            $path = $video->store('public/cars_videos');
+            $newPaths[] = Storage::url($path);
+        }
+
+        $car->videos = array_merge($existingVideos, $newPaths);
+        $car->save();
+
+        return response()->json([
+            'message' => '✅ تم رفع الفيديو بنجاح.',
+            'videos' => $car->videos,
+        ], 201);
+    }
+
+    /**
+     * ⬅️ جديد: حذف فيديو واحد من سيارة، بمعرفة رابطه بالضبط (كما وصل
+     * سابقاً ضمن مصفوفة videos)، دون التأثير على بقية الفيديوهات.
+     */
+    public function removeVideo(Request $request, $id)
+    {
+        $user = $request->user();
+        $car = Car::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$car) {
+            return response()->json(['message' => 'السيارة غير موجودة أو ليس لديك صلاحية لتعديلها.'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'video_url' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $existingVideos = $car->videos ?? [];
+
+        if (!in_array($request->video_url, $existingVideos, true)) {
+            return response()->json(['message' => 'هذا الفيديو غير مرتبط بهذه السيارة.'], 404);
+        }
+
+        Storage::delete(str_replace('/storage/', 'public/', $request->video_url));
+
+        $car->videos = array_values(array_filter(
+            $existingVideos,
+            fn ($url) => $url !== $request->video_url
+        ));
+        $car->save();
+
+        return response()->json([
+            'message' => '✅ تم حذف الفيديو بنجاح.',
+            'videos' => $car->videos,
+        ]);
+    }
 }

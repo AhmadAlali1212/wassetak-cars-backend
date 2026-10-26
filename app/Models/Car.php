@@ -26,6 +26,7 @@ class Car extends Model
         'latitude',
         'longitude',
         'images',
+        'videos',
         'approval_status',
         'approval_reason',
         'approved_at',
@@ -39,6 +40,7 @@ class Car extends Model
     protected $casts = [
         //سيعامل الصور على انها مصفوفة لسهولة العرض
         'images' => 'array',
+        'videos' => 'array',
         'approved_at' => 'datetime',
     ];
 
