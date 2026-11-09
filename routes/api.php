@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\PromotionController;
 use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Api\FollowController;
 use App\Http\Controllers\Api\AdController;
 use App\Http\Controllers\Auth\OtpPasswordResetController;

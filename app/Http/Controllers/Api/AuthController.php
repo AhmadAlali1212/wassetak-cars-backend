@@ -173,7 +173,10 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)->first();
-        $user->update(['email_verified_at' => now()]);
+        $user->update([
+            'email_verified_at' => now(),
+            'is_verified' => true,
+        ]);
 
         DB::table('email_verification_otps')->where('email', $request->email)->delete();
 

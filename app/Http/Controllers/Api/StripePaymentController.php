@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Validator;
 
 class StripePaymentController extends Controller
 {
-    public function __construct(protected StripeService $stripe)
+    public function __construct(
+        protected StripeService $stripe,
+        protected StripeWebhookController $webhook,
+    )
     {
     }
 
@@ -133,6 +136,28 @@ class StripePaymentController extends Controller
 
         if (!$topup) {
             return response()->json(['message' => 'عملية الشحن غير موجودة.'], 404);
+        }
+
+        if ($topup->status === 'pending_payment' && $topup->stripe_payment_intent_id) {
+            try {
+                $intent = $this->stripe->retrievePaymentIntent($topup->stripe_payment_intent_id);
+
+                if ($intent->status === 'succeeded') {
+                    $this->webhook->creditPaymentIntent($intent);
+                    $topup->refresh();
+                }
+            } catch (\Throwable $e) {
+                Log::error('Stripe top-up status reconciliation failed', [
+                    'user_id' => $request->user()->id,
+                    'topup_id' => $topup->id,
+                    'payment_intent_id' => $topup->stripe_payment_intent_id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return response()->json([
+                    'message' => 'تعذر التحقق من حالة الدفع عبر Stripe.',
+                ], 502);
+            }
         }
 
         return response()->json([

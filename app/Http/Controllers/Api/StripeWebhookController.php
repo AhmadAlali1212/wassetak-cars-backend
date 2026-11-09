@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Stripe\PaymentIntent;
 
 class StripeWebhookController extends Controller
 {
@@ -78,6 +79,15 @@ class StripeWebhookController extends Controller
 
             // 500 يجعل Stripe يعيد إرسال الحدث لاحقاً.
             return response()->json(['message' => 'Webhook processing failed.'], 500);
+        }
+    }
+
+    public function creditPaymentIntent(PaymentIntent $intent): void
+    {
+        $notification = $this->handlePaymentSucceeded($intent);
+
+        if ($notification) {
+            NotificationService::send(...$notification);
         }
     }
 
