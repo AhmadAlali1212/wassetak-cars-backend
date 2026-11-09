@@ -66,15 +66,19 @@ class AdminUserSeeder extends Seeder
             ],
         ];
 
-        foreach ($users as $user) {
-            User::updateOrCreate(
-                ['email' => $user['email']],
-                array_merge($user, [
-                    'password' => Hash::make('password'),
-                    'verification_documents' => null,
-                    'email_verified_at' => now(),
-                ])
-            );
-        }
+        foreach ($users as $data) {
+              $user = User::updateOrCreate(
+              ['email' => $data['email']],
+                  array_merge($data, [
+                 'password' => Hash::make('password'),
+                 'verification_documents' => null,
+                 'email_verified_at' => now(),
+               ])
+           );
+
+    if (!$user->wallet()->exists()) {
+        $user->wallet()->create(['balance' => 0]);
+              }
+           }
     }
 }
